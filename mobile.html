@@ -1,0 +1,182 @@
+<!doctype html>
+<html>
+  <head>
+    <title>YT-Clicks</title>
+	<style>
+      * { margin: 0; padding: 0; box-sizing: border-box; font-size:16px;}
+      body { font: 13px Helvetica, Arial; text-size-adjust: none;}
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; font-size:80px}
+      form input { border: 0; padding: 10px; width: 70%; margin-right: .5%; border-radius: 6px;font-size:80px}
+      form button { width: 29%; background: rgb(130, 224, 255); border: none; padding: 10px; border-radius: 6px;font-size:80px}
+      #messages { list-style-type: none; margin: 0; padding: 0;font-size:40px}
+      #messages li { padding: 5px 10px;font-size:40px; max-height: 999999px;}
+      #messages li:nth-child(odd) { background: #eee; }
+      #messages { margin-bottom: 40px }
+	  #wrapper div, iframe {float: left;padding: 10px;}
+	  .flex-container {
+		display: flex;
+		flex-direction: column;
+	  }
+	  #votes { list-style-type: none; margin: 0; padding: 0; }
+	  #votes li:nth-child(odd) { background: #eee; }
+	  #scores { list-style-type: none; margin: 0; padding: 0; }
+	  #scores li:nth-child(odd) { background: #eee; }
+	  #playerlist { list-style-type: none; margin: 0; padding: 0; }
+	  #playerlist li:nth-child(odd) { background: #eee; }
+	  .button { 
+		font-size:60px;
+		padding:10px;
+		border-radius: 10px;
+		width:7em;
+	  }	
+	  #votes li { padding:5px 10px; font-size:40px}
+	  #scores li { padding:5px 10px; font-size:40px}
+	  #playerlist li { padding:5px 10px; font-size:40px}
+	  .backgroundMain {
+		background-image:url("http://localhost:8080/images/back3.jpg");
+		background-size:cover;
+	  }
+	  .backgroundTop {
+		background-image:url("http://localhost:8080/images/top3.jpg");
+		background-size:cover;
+	  }
+    </style>
+  </head>
+  <body >
+	<div class="backgroundTop" style="font-size:24px; padding:10px;">
+		<input class="button" style= "" id="name" autocomplete="off" autofocus/>
+		<button class="button" id="change">changeName</button>
+	</div>
+	<div style="font-size:24px; padding:10px;">
+		<button class="button" id="fish" style="">FISHCARD</button>
+		<button class="button" id="next" style="">nextVideo</button>
+	</div>
+	<hr>
+	<div style="font-size:24px; padding:10px;">
+		<p id="clickView" style="font-size:60px;">Clicks: ???</p>
+	</div>
+	<hr>
+	<div class="flex-container">
+		<div class="backgroundMain" id="wrapper">
+			<div>
+				<p style="font-size:60px;">Playerlist</p><br>
+				<ul id="playerlist"></ul>
+			</div>
+			<div>
+				<p style="font-size:60px;">Guesses</p><br>
+				<ul id="votes"></ul>
+			</div>
+			<div>
+				<p style="font-size:60px;">Points</p><br>
+				<ul id="scores"></ul>
+			</div>
+		</div>
+		<br>
+		<hr>
+		<div id=scrolldiv style="overflow-y: scroll; height:500px;">
+			<ul id="messages" style="font-size:40px"></ul>
+		</div>
+	</div>
+	
+    <form action="" >
+      <input id="m" autocomplete="off" /><button>Guess</button>
+    </form>
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+	
+      $(function () {
+        var socket = io();
+		var haken = " <span style=\"color:#0f0;font-size:30px;\">&check;</span>";
+		var kreuz = " <span style=\"color:#f00;font-size:30px;\">&cross;</span>";
+		$("#change").click(function() {
+			var name = $('#name').val();
+			if(name.length == 0) { //leeres NamensFeld
+				$('#messages').append($('<li>').text("Enter at least one char.").css('color', 'blue'));
+				$("#scrolldiv").scrollTop($("#scrolldiv")[0].scrollHeight);
+			}
+			name = name.substring(0,Math.min(14, name.length)); //max 14 chars
+			socket.emit('change name', name);
+		});
+		$("#next").click(function() {
+			socket.emit('nextVideo');
+		});
+		$("#name").keyup(function(event) {
+			if (event.keyCode === 13) {
+				$("#change").click();
+			}
+		});
+		$("#fish").click(function() {
+		  if(! $('#next').prop("disabled")) { //Runde vorbei
+			$('#messages').append($('<li>').text("The round is over!").css('color', 'blue'));
+			$("#scrolldiv").scrollTop($("#scrolldiv")[0].scrollHeight);
+			$('#m').val('');
+			return false;
+		  }
+		  $('#fish').prop("disabled",true);
+	      socket.emit('fish');
+		});
+        $('form').submit(function(){
+		  var guess = parseInt($('#m').val());
+		  console.log(guess);
+		  if(isNaN(guess)) { //keine Nummer eingegeben
+			$('#messages').append($('<li>').text("That's not a number!").css('color', 'blue'));
+			$("#scrolldiv").scrollTop($("#scrolldiv")[0].scrollHeight);
+			$('#m').val('');
+			return false;
+		  }
+		  if(! $('#next').prop("disabled")) { //Runde vorbei
+			$('#messages').append($('<li>').text("The round is over!").css('color', 'blue'));
+			$("#scrolldiv").scrollTop($("#scrolldiv")[0].scrollHeight);
+			$('#m').val('');
+			return false;
+		  }
+
+          socket.emit('chat message', guess);
+		  $('#messages').append($('<li>').text("You guessed " + $('#m').val() + " clicks.").css('color', 'blue'));
+		  $("#scrolldiv").scrollTop($("#scrolldiv")[0].scrollHeight);
+          $('#m').val('');
+          return false;
+        });
+        socket.on('chat message', function(msg){
+          $('#messages').append($('<li>').text(msg));
+		  $("#scrolldiv").scrollTop($("#scrolldiv")[0].scrollHeight);
+          //window.scrollTo(0, document.body.scrollHeight);
+        });
+		socket.on('nv', function(vid){
+		  $("#clickView").html("Clicks: ???");
+          console.log("new ID: " + vid);
+		  var url = "http://www.youtube.com/embed/" + vid + "?autoplay=1"; //&controls=0
+		  console.log("URL:" + url + ".");
+		  document.getElementById('stage').src = url;
+        });
+		
+		socket.on('vote', function(voteText){
+		  $('#votes').html(voteText);
+		});
+		socket.on('score', function(voteText){
+		  $('#scores').html(voteText);
+		});
+		socket.on('playerlist', function(voteText, symbol){
+		  if(symbol == "haken") {
+		    symbol = haken;
+		  } else {
+		    symbol = kreuz;
+		  }
+		  $('#playerlist').html(voteText);// + symbol + "</li>");
+		});
+		socket.on('actNextB', function(scoreText){
+		  $('#next').prop("disabled",false);
+		});
+		socket.on('deactNextB', function(scoreText){
+		  $('#next').prop("disabled",true);
+		});
+		socket.on('clickAmount', function(clicks){
+		  $('#messages').append($('<li>').text("The video has " + clicks + " clicks!").css({'color': 'red', 'font-weight': 'bold' }));
+		  $("#scrolldiv").scrollTop($("#scrolldiv")[0].scrollHeight);
+		  $("#clickView").html("Clicks: " + "<span style=\"color:#f00;font-size:60px;\">" + clicks + "</span>");
+		});
+      });
+    </script>
+  </body>
+</html>
