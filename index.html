@@ -32,11 +32,9 @@
 	  #scores li { padding:5px 10px; font-size:22px}
 	  #playerlist li { padding:5px 10px; font-size:22px}
 	  .backgroundMain {
-		background-image:url("http://localhost:8080/images/back3.jpg");
 		background-size:cover;
 	  }
 	  .backgroundTop {
-		background-image:url("http://localhost:8080/images/top3.jpg");
 		background-size:cover;
 	  }
     </style>
@@ -45,7 +43,7 @@
 	<div class="backgroundTop" style="font-size:24px; padding:10px;">
 		<span style="color:white;font-size:24px">Name:</span> <input style= "font-size:24px; width:10em; padding:5px; border-radius: 6px;" id="name" autocomplete="off" autofocus/>
 		<button class="button" id="change">change</button>
-		<button class="button" id="fish" style="margin-left: 100px;background:url(http://localhost:8080/images/fishcard.jpg); background-repeat:no-repeat;width:6em;color:transparent;">F</button>
+		<button class="button" id="fish" style="margin-left: 100px; background-repeat:no-repeat;width:6em;color:transparent;">F</button>
 		<button class="button" id="next" style="margin-left: 100px;">nextVideo</button>
 		<div style="float: right;">
 		<input type="checkbox" style="font-size: 200%;" id="localHost" name="localHost" value="host">
@@ -88,9 +86,17 @@
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
       $(function () {
+		//CHANGE IP ADDRESS OR PORT HERE
+		var ipAdresse = "77.20.131.127";
+		var port = "8080";
+		$(".backgroundMain").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/back3.jpg)");
+		$(".backgroundTop").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/top3.jpg)");
+		$("#fish").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/fishcard.jpg)");
+	  
         var socket = io();
 		var haken = " <span style=\"color:#0f0;font-size:22px;\">&check;</span>";
 		var kreuz = " <span style=\"color:#f00;font-size:22px;\">&cross;</span>";
+		var hotSeat = false;
 		$("#change").click(function() {
 			var name = $('#name').val();
 			if(name.length == 0) { //leeres NamensFeld
@@ -116,7 +122,7 @@
 			return false;
 		  }
 		  $('#fish').prop("disabled",true);
-		  $('#fish').css("background-image", "url(http://localhost:8080/images/no_fishcard.jpg)");
+		  $('#fish').css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/no_fishcard.jpg)");
 	      socket.emit('fish');
 		});
 		//local Host
@@ -130,6 +136,7 @@
 				$('#next').prop("disabled",true);
 				$('#name').prop("disabled",true);
 				$('#change').prop("disabled",true);
+				hotSeat = true;
 			} else {
 				socket.emit('stopLocal');
 				$('#fish').prop("disabled",false);
@@ -138,7 +145,8 @@
 				$('#next').prop("disabled",false);
 				$('#name').prop("disabled",false);
 				$('#change').prop("disabled",false);
-				$('#fish').css("background-image", "url(http://localhost:8080/images/fishcard.jpg)");
+				$('#fish').css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/fishcard.jpg)");
+				hotSeat = false
 			}
 		});
         $('form').submit(function(){
@@ -174,6 +182,10 @@
 		  console.log("URL:" + url + ".");
 		  document.getElementById('stage').src = url;
 		  $("#clickView").html("Clicks: ???");
+		  if(hotSeat) {
+			document.getElementById("stage").width = "1600";
+			document.getElementById("stage").height = "900";
+		  }
         });
 		
 		socket.on('vote', function(voteText){
