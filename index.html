@@ -93,7 +93,6 @@
         var socket = io();
 		var haken = " <span style=\"color:#0f0;font-size:22px;\">&check;</span>";
 		var kreuz = " <span style=\"color:#f00;font-size:22px;\">&cross;</span>";
-		var hotSeat = false;
 		$("#change").click(function() {
 			var name = $('#name').val();
 			if(name.length == 0) { //leeres NamensFeld
@@ -135,7 +134,8 @@
 				$('#change').prop("disabled",true);
 				$('#fish').css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/no_fishcard.png)");
 				$('#former').css("display", "none");
-				hotSeat = true;
+				document.getElementById("stage").width = "1600";
+				document.getElementById("stage").height = "900";
 			} else {
 				socket.emit('stopLocal');
 				$('#fish').prop("disabled",false);
@@ -146,7 +146,8 @@
 				$('#change').prop("disabled",false);
 				$('#fish').css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/fishcard.png)");
 				$('#former').css("display", "inline");
-				hotSeat = false
+				document.getElementById("stage").width = "1120";
+				document.getElementById("stage").height = "630";
 			}
 		});
         $('form').submit(function(){
@@ -182,10 +183,6 @@
 		  console.log("URL:" + url + ".");
 		  document.getElementById('stage').src = url;
 		  $("#clickView").html("Clicks: ???");
-		  if(hotSeat) {
-			document.getElementById("stage").width = "1600";
-			document.getElementById("stage").height = "900";
-		  }
         });
 		
 		socket.on('vote', function(voteText){

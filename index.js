@@ -67,6 +67,9 @@ io.on('connection', function(socket){
 		//füge Host wieder hinzu
 		wm_points.set(socket, 0);
 		refreshPlayerlist();
+		if(gameOver == 0) { //Spiel läuft
+			socket.emit('deactNextB'); //nextButton für den "neuen" Spieler deaktivieren
+		}
 	});
 	socket.on('change name', function(name){
 		var oldName = wm_names.get(socket)
