@@ -3,9 +3,12 @@
   <head>
     <title>YT-Clicks</title>
 	<style>
+		
       * { margin: 0; padding: 0; box-sizing: border-box; font-size:16px;}
       body { font: 13px Helvetica, Arial; text-size-adjust: none;}
-      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; font-size:80px}
+      form {background: #fff; position: fixed; bottom: 0; font-size:80px;}
+	  #r_form{background: #000;padding: 3px; width: 100%;}
+	  #scrolldiv{border-left: 6px solid #32CD32; border-top: 6px solid #32CD32; background-color: #ffffff;}
       form input { border: 0; padding: 10px; width: 70%; margin-right: .5%; border-radius: 6px;font-size:80px}
       form button { width: 29%; background: rgb(130, 224, 255); border: none; padding: 10px; border-radius: 6px;font-size:80px}
       #messages { list-style-type: none; margin: 0; padding: 0;font-size:40px}
@@ -26,66 +29,80 @@
 	  .button { 
 		font-size:60px;
 		padding:10px;
+		margin:5px;
 		border-radius: 10px;
-		width:7em;
+		width:7.6em;
 	  }	
 	  #votes li { padding:5px 10px; font-size:40px}
 	  #scores li { padding:5px 10px; font-size:40px}
 	  #playerlist li { padding:5px 10px; font-size:40px}
+	  
+	  html, body, .flex-container {
+		height: 75%;
+	  }	
 	  .backgroundMain {
-		background-image:url("http://localhost:8080/images/back3.jpg");
 		background-size:cover;
+		flex-grow: 1;
 	  }
 	  .backgroundTop {
-		background-image:url("http://localhost:8080/images/top3.jpg");
 		background-size:cover;
 	  }
     </style>
   </head>
   <body >
-	<div class="backgroundTop" style="font-size:24px; padding:10px;">
-		<input class="button" style= "" id="name" autocomplete="off" autofocus/>
-		<button class="button" id="change">changeName</button>
-	</div>
-	<div style="font-size:24px; padding:10px;">
-		<button class="button" id="fish" style="">FISHCARD</button>
-		<button class="button" id="next" style="">nextVideo</button>
-	</div>
-	<hr>
-	<div style="font-size:24px; padding:10px;">
-		<p id="clickView" style="font-size:60px;">Clicks: ???</p>
-	</div>
-	<hr>
-	<div class="flex-container">
-		<div class="backgroundMain" id="wrapper">
-			<div>
-				<p style="font-size:60px;">Playerlist</p><br>
-				<ul id="playerlist"></ul>
-			</div>
-			<div>
-				<p style="font-size:60px;">Guesses</p><br>
-				<ul id="votes"></ul>
-			</div>
-			<div>
-				<p style="font-size:60px;">Points</p><br>
-				<ul id="scores"></ul>
-			</div>
+	<div class="backgroundTop">
+		<div style="font-size:24px; padding:10px;">
+			<input class="button" style= "" id="name" autocomplete="off" autofocus/>
+			<button class="button" id="change" style="float: right;">changeName</button>
 		</div>
-		<br>
-		<hr>
-		<div id=scrolldiv style="overflow-y: scroll; height:500px;">
-			<ul id="messages" style="font-size:40px"></ul>
+		<div style="font-size:24px; padding:10px;">
+			<button class="button" id="fish" style="">FISHCARD</button>
+			<button class="button" id="next" style="float: right;">nextVideo</button>
+		</div>
+	</div>
+	<hr>	
+	<div class="flex-container">
+		<div class="backgroundMain">
+			<div style="font-size:24px; padding:10px;">
+				<p id="clickView" style="font-size:60px;">Clicks: ???</p>
+			</div>
+			<hr>
+			<div id="wrapper">
+				<div>
+					<p style="font-size:60px;">Playerlist</p><br>
+					<ul id="playerlist"></ul>
+				</div>
+				<div>
+					<p style="font-size:60px;">Guesses</p><br>
+					<ul id="votes"></ul>
+				</div>
+				<div>
+					<p style="font-size:60px;">Points</p><br>
+					<ul id="scores"></ul>
+				</div>
+			</div>
 		</div>
 	</div>
 	
     <form action="" >
-      <input id="m" autocomplete="off" /><button>Guess</button>
+	<hr>
+		<div id=scrolldiv style="overflow-y: scroll; height:500px;">
+			<ul id="messages" style="font-size:40px"></ul>
+		</div>
+		<div id="r_form">
+			<input id="m" autocomplete="off" /><button>Guess</button>
+		</div>
     </form>
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
 	
       $(function () {
+	    var ipAdresse = "77.20.131.127";
+		var port = "8080";
+		$(".backgroundMain").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/back3.jpg)");
+		$(".backgroundTop").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/top3.jpg)");
+	  
         var socket = io();
 		var haken = " <span style=\"color:#0f0;font-size:30px;\">&check;</span>";
 		var kreuz = " <span style=\"color:#f00;font-size:30px;\">&cross;</span>";

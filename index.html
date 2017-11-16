@@ -79,7 +79,7 @@
 		</div>
 	</div>
 	
-    <form action="" >
+    <form action="" id="former">
       <input id="m" autocomplete="off" /><button id="g">Guess</button>
     </form>
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
@@ -136,6 +136,8 @@
 				$('#next').prop("disabled",true);
 				$('#name').prop("disabled",true);
 				$('#change').prop("disabled",true);
+				$('#fish').css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/no_fishcard.jpg)");
+				$('#former').css("display", "none");
 				hotSeat = true;
 			} else {
 				socket.emit('stopLocal');
@@ -146,6 +148,7 @@
 				$('#name').prop("disabled",false);
 				$('#change').prop("disabled",false);
 				$('#fish').css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/fishcard.jpg)");
+				$('#former').css("display", "inline");
 				hotSeat = false
 			}
 		});
