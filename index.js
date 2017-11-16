@@ -1,7 +1,13 @@
+//IP AND PORT
+var ip = "77.20.131.127";
+var portt = "8080";
+//IP AND PORT
+
+
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var port = process.env.PORT || 8080;
+var port = process.env.PORT || portt;
 
 var express = require('express');
 var path = require('path');
@@ -31,6 +37,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 io.on('connection', function(socket){
 	//INIT IF CONNECTED
+	socket.emit('setIPPORT', ip, portt);
 	wm_points.set(socket, 0);
 	io.emit('chat message', "A new player has connected.");
 	refreshPlayerlist();
@@ -207,7 +214,7 @@ io.on('connection', function(socket){
 			//add points
 			var value = wm.get(win_s[0]);
 			var addPoints = 0;
-			if(value == video_clicks) {
+			if(value == video_clicks && video_clicks != 0) {
 				addPoints = video_clicks;
 			} else {
 				addPoints = 1;
