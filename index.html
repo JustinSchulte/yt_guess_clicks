@@ -26,8 +26,10 @@
 	
 	<body>
 		<div class="backgroundTop" style="font-size:24px; padding:10px;">
-			<img id="icon" src="" alt="Icon" style="width:64px;height:64px;">
-			<span style="color:white;font-size:48px" align="center">Teewurst24.party</span>
+			<a href="/" style="text-decoration: none;">
+				<img id="icon" src="" alt="Icon" style="width:64px;height:64px;">
+				<span style="color:white;font-size:48px" align="center">Teewurst24.party</span>
+			</a>
 		</div>
 		<div class="backgroundMain" style="font-size:24px; padding:10px;">
 			<button class="button" id="yt">YT-Clicks</button>
@@ -37,8 +39,8 @@
 		
 		
 		
-		<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
-		<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+		<script src="/scripts/socket.io-1.2.0.js"></script>
+		<script src="/scripts/jquery-1.11.1.js"></script>
 		<script>
 			$(function () {
 				//CHANGE IP ADDRESS OR PORT HERE
@@ -58,7 +60,6 @@
 					port = s_port;
 					$(".backgroundMain").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/back3.jpg)");
 					$(".backgroundTop").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/top3.jpg)");
-					$("#fish").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/fishcard.png)");
 					$("#icon").attr("src","http://" + ipAdresse + ":" + port + "/images/teewurst_icon_white.ico");
 				});
 			});
