@@ -1,0 +1,221 @@
+<!doctype html>
+<html>
+  <head>
+    <title>YT-Clicks</title>
+	<style>
+      * { margin: 0; padding: 0; box-sizing: border-box; font-size:16px;}
+      body { font: 13px Helvetica, Arial; }
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; border-radius: 6px;}
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; border-radius: 6px; font-size:20px;}
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+      #messages { margin-bottom: 40px }
+	  #wrapper div, iframe {float: left;padding: 20px;}
+	  .flex-container {
+		display: flex;
+		flex-direction: column;
+	  }
+	  #votes { list-style-type: none; margin: 0; padding: 0; }
+	  #votes li:nth-child(odd) { background: #eee; }
+	  #scores { list-style-type: none; margin: 0; padding: 0; }
+	  #scores li:nth-child(odd) { background: #eee; }
+	  #playerlist { list-style-type: none; margin: 0; padding: 0; }
+	  #playerlist li:nth-child(odd) { background: #eee; }
+	  .button { 
+		font-size:24px;
+		padding:5px;
+		border-radius: 6px;
+		width:6em;
+	  }	
+	  #votes li { padding:5px 10px; font-size:22px}
+	  #scores li { padding:5px 10px; font-size:22px}
+	  #playerlist li { padding:5px 10px; font-size:22px}
+	  .backgroundMain {
+		background-size:cover;
+	  }
+	  .backgroundTop {
+		background-size:cover;
+	  }
+    </style>
+  </head>
+  <body >
+	<div class="backgroundTop" style="font-size:24px; padding:10px;">
+		<span style="color:white;font-size:24px">Name:</span> <input style= "font-size:24px; width:10em; padding:5px; border-radius: 6px;" id="name" autocomplete="off" autofocus/>
+		<button class="button" id="change">change</button>
+		<button class="button" id="fish" style="margin-left: 100px; background-size:contain;color:transparent;background-repeat:no-repeat;background-position:center;">F</button>
+		<button class="button" id="next" style="margin-left: 100px;">nextVideo</button>
+		<div style="float: right;">
+		<input type="checkbox" style="font-size: 200%;" id="localHost" name="localHost" value="host">
+		<label for="localHost" style="color:white;font-size:20px;">Hot Seat Game?<label>
+		</div>
+	</div>
+	<hr>
+	<div class="flex-container">
+		<div class="backgroundMain" id="wrapper">
+			<div>
+				<p style="font-size:30px;">Playerlist</p><br>
+				<ul id="playerlist"></ul>
+			</div>
+			<iframe id="stage" width="1120" height="630" src="" frameborder="0" allowfullscreen></iframe>
+			<div>
+				<p id="clickView" style="font-size:30px;">Clicks: ???</p>
+				<br>
+				<br>
+				<br>
+				<div>
+					<p style="font-size:30px;">Guesses</p><br>
+					<ul id="votes"></ul>
+				</div>
+				<div>
+					<p style="font-size:30px;">Points</p><br>
+					<ul id="scores"></ul>
+				</div>
+			</div>
+		</div>
+		<hr>
+		<div id=scrolldiv style="overflow-y: scroll; height:250px;">
+		<ul id="messages" ></ul>
+		</div>
+	</div>
+	
+    <form action="" id="former">
+      <input id="m" autocomplete="off" /><button id="g">Guess</button>
+    </form>
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+      $(function () {
+		//VARIABLES
+		var ipAdresse = "";
+		var port = "";
+        var socket = io();
+		
+		//CONNECT TO Game
+		socket.emit('gameConnection');
+		
+		//FUNCTIONS
+		$("#change").click(function() {
+			var name = $('#name').val();
+			if(name.length == 0) { //leeres NamensFeld
+				$('#messages').append($('<li>').text("Enter at least one char.").css('color', 'blue'));
+				$("#scrolldiv").scrollTop($("#scrolldiv")[0].scrollHeight);
+			}
+			name = name.substring(0,Math.min(14, name.length)); //max 14 chars
+			socket.emit('change name', name);
+		});
+		$("#next").click(function() {
+			socket.emit('nextVideo');
+		});
+		$("#name").keyup(function(event) {
+			if (event.keyCode === 13) {
+				$("#change").click();
+			}
+		});
+		$("#fish").click(function() {
+		  if(! $('#next').prop("disabled")) { //Runde vorbei
+			$('#messages').append($('<li>').text("The round is over!").css('color', 'blue'));
+			$("#scrolldiv").scrollTop($("#scrolldiv")[0].scrollHeight);
+			$('#m').val('');
+			return false;
+		  }
+		  $('#fish').prop("disabled",true);
+		  $('#fish').css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/no_fishcard.png)");
+	      socket.emit('fish');
+		});
+		//local Host
+		$("#localHost").click(function() {
+			console.log($('#localHost').is(':checked'));
+			if($('#localHost').is(':checked')) {
+				socket.emit('startLocal');
+				$('#fish').prop("disabled",true);
+				$('#m').prop("disabled",true);
+				$('#g').prop("disabled",true);
+				$('#next').prop("disabled",true);
+				$('#name').prop("disabled",true);
+				$('#change').prop("disabled",true);
+				$('#fish').css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/no_fishcard.png)");
+				$('#former').css("display", "none");
+				document.getElementById("stage").width = "1600";
+				document.getElementById("stage").height = "900";
+			} else {
+				socket.emit('stopLocal');
+				$('#fish').prop("disabled",false);
+				$('#m').prop("disabled",false);
+				$('#g').prop("disabled",false);
+				$('#next').prop("disabled",false);
+				$('#name').prop("disabled",false);
+				$('#change').prop("disabled",false);
+				$('#fish').css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/fishcard.png)");
+				$('#former').css("display", "inline");
+				document.getElementById("stage").width = "1120";
+				document.getElementById("stage").height = "630";
+			}
+		});
+        $('form').submit(function(){
+		  var guess = parseInt($('#m').val());
+		  console.log(guess);
+		  if(isNaN(guess)) { //keine Nummer eingegeben
+			$('#messages').append($('<li>').text("That's not a number!").css('color', 'blue'));
+			$("#scrolldiv").scrollTop($("#scrolldiv")[0].scrollHeight);
+			$('#m').val('');
+			return false;
+		  }
+		  if(! $('#next').prop("disabled")) { //Runde vorbei
+			$('#messages').append($('<li>').text("The round is over!").css('color', 'blue'));
+			$("#scrolldiv").scrollTop($("#scrolldiv")[0].scrollHeight);
+			$('#m').val('');
+			return false;
+		  }
+
+          socket.emit('chat message', guess);
+		  $('#messages').append($('<li>').text("You guessed " + $('#m').val() + " clicks.").css('color', 'blue'));
+		  $("#scrolldiv").scrollTop($("#scrolldiv")[0].scrollHeight);
+          $('#m').val('');
+          return false;
+        });
+        socket.on('chat message', function(msg){
+          $('#messages').append($('<li>').text(msg));
+		  $("#scrolldiv").scrollTop($("#scrolldiv")[0].scrollHeight);
+          //window.scrollTo(0, document.body.scrollHeight);
+        });
+		socket.on('nv', function(vid){
+          console.log("new ID: " + vid);
+		  var url = "http://www.youtube.com/embed/" + vid + "?autoplay=1&iv_load_policy=3"; //&controls=0
+		  console.log("URL:" + url + ".");
+		  document.getElementById('stage').src = url;
+		  $("#clickView").html("Clicks: ???");
+        });
+		
+		socket.on('vote', function(voteText){
+		  $('#votes').html(voteText);
+		});
+		socket.on('score', function(voteText){
+		  $('#scores').html(voteText);
+		});
+		socket.on('playerlist', function(voteText){
+		  $('#playerlist').html(voteText);// + symbol + "</li>");
+		});
+		socket.on('actNextB', function(scoreText){
+		  $('#next').prop("disabled",false);
+		});
+		socket.on('deactNextB', function(scoreText){
+		  $('#next').prop("disabled",true);
+		});
+		socket.on('clickAmount', function(clicks){
+		  $('#messages').append($('<li>').text("The video has " + clicks + " clicks!").css({'color': 'red', 'font-weight': 'bold' }));
+		  $("#scrolldiv").scrollTop($("#scrolldiv")[0].scrollHeight);
+		  $("#clickView").html("Clicks: " + "<span style=\"color:#f00;font-size:30px;\">" + clicks + "</span>");
+		});
+		socket.on('setIPPORT', function(s_ip, s_port){
+		  ipAdresse = s_ip;
+		  port = s_port;
+		  $(".backgroundMain").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/back3.jpg)");
+		  $(".backgroundTop").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/top3.jpg)");
+		  $("#fish").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/fishcard.png)");
+		});
+      });
+    </script>
+  </body>
+</html>

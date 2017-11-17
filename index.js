@@ -27,12 +27,16 @@ var wm_fish = new WeakMap();
 var haken = " <span style=\"color:#0f0;font-size:30px;\">&check;</span>";
 var kreuz = " <span style=\"color:#f00;font-size:30px;\">&cross;</span>";
 
-app.get('/mobile',function(req,res){
- res.sendFile(path.join(__dirname+'/mobile.html'));
-});
 app.get('/', function(req, res){
-  res.sendFile(__dirname + '/index.html');
+	res.sendFile(__dirname + '/index.html');
 });
+app.get('/ytclicks', function(req, res){
+	res.sendFile(__dirname + '/ytclicks.html');
+});
+app.get('/ytclicks/mobile',function(req,res){
+	res.sendFile(path.join(__dirname +'/ytclicks/mobile.html'));
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 var favicon = require('serve-favicon');
 app.use(favicon(__dirname + '/public/images/teewurst_icon.ico'));
@@ -40,13 +44,14 @@ app.use(favicon(__dirname + '/public/images/teewurst_icon.ico'));
 io.on('connection', function(socket){
 	//INIT IF CONNECTED
 	socket.emit('setIPPORT', ip, portt);
-	wm_points.set(socket, 0);
-	io.emit('chat message', "A new player has connected.");
-	refreshPlayerlist();
-	if(gameOver == 0) { //Spiel läuft
-		socket.emit('deactNextB'); //nextButton für den neuen Spieler deaktivieren
-	}
-	
+	socket.on('gameConnection', function(){
+		wm_points.set(socket, 0);
+		io.emit('chat message', "A new player has connected.");
+		refreshPlayerlist();
+		if(gameOver == 0) { //Spiel läuft
+			socket.emit('deactNextB'); //nextButton für den neuen Spieler deaktivieren
+		}
+	});
 	
 	//ALL FUNCTIONS
 	socket.on('startLocal', function(){
@@ -303,7 +308,7 @@ function refreshPlayerlist() {
 		}
 		pl = pl + "<li>" + wm_names.get(s) + symbol + "</li>";
 	}
-	io.emit('playerlist', pl, symbol);
+	io.emit('playerlist', pl);
 }
 
 function contains(arr, element) {
