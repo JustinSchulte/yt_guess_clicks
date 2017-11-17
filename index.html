@@ -179,7 +179,7 @@
         });
 		socket.on('nv', function(vid){
           console.log("new ID: " + vid);
-		  var url = "http://www.youtube.com/embed/" + vid + "?autoplay=1"; //&controls=0
+		  var url = "http://www.youtube.com/embed/" + vid + "?autoplay=1&iv_load_policy=3"; //&controls=0
 		  console.log("URL:" + url + ".");
 		  document.getElementById('stage').src = url;
 		  $("#clickView").html("Clicks: ???");

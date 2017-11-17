@@ -1,6 +1,6 @@
 //IP AND PORT
-var ip = "77.20.131.127";
-var portt = "8080";
+var ip = "teewurst24.party";
+var portt = "80";
 //IP AND PORT
 
 
@@ -34,6 +34,8 @@ app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
 });
 app.use(express.static(path.join(__dirname, 'public')));
+var favicon = require('serve-favicon');
+app.use(favicon(__dirname + '/public/images/teewurst_icon.ico'));
 
 io.on('connection', function(socket){
 	//INIT IF CONNECTED
@@ -191,82 +193,100 @@ io.on('connection', function(socket){
 		
 		if(startingConntectedPlayers == tipps) {
 			//Game over, show results
-			gameOver = 1;
-			io.emit('actNextB'); //ak nextButton
-			io.emit('clickAmount', video_clicks);
-			
-			var win_s = []; //Liste von Gewinnern
-			var diff = 9007199254740992;
-			var voteList = "";
-			for (var i in io.sockets.connected) { //player with lowest diff
-				s = io.sockets.connected[i];
-				if(!(wm_points.has(s))) continue; //überspringe Host
-				console.log(video_clicks);
-				if(Math.abs(wm.get(s) - video_clicks) < diff) {
-					win_s = []; //array leeren, gibt nur einen Besten(Fall zwei zuvor haben sie selbe nicht minDiff-Wertung)
-					win_s[0] = s;
-					diff = Math.abs(wm.get(s) - video_clicks);
-				} else if(Math.abs(wm.get(s) - video_clicks) == diff) {
-					win_s.push(s);
-				}
-				//add player to VoteList
-				voteList += "<li>" + wm_names.get(s) + ": " + wm.get(s) + "</li>";
-			}
-			io.emit('vote', voteList); //send VoteList
-			
-			//add points
-			var value = wm.get(win_s[0]);
-			var addPoints = 0;
-			if(value == video_clicks && video_clicks != 0) {
-				addPoints = video_clicks;
-			} else {
-				addPoints = 1;
-			}
-			addPoints = addPoints * multipl;
-			multipl = 1; //nur für diese Runde
-			
-			for (var i = 0; i < win_s.length; i++) {
-				var p_addPoints = addPoints;
-				var win = win_s[i];
-				if(wm_fish.has(win)) p_addPoints = p_addPoints * 2; //fishcard aktiviert
-				var newScore = parseInt(p_addPoints) + parseInt(wm_points.get(win));
-				wm_points.set(win, newScore);
-				
-				//send winning message
-				var name = wm_names.get(win);
-				var message = name + " won with an estimation of " + wm.get(win_s[i]) + " clicks and get " + p_addPoints + " Points.";
-				io.emit('chat message', message);
-			}
-				
-			//show all scores
-			var scoresText = "";
-			for (var i in io.sockets.connected) { //player with lowest diff
-				s = io.sockets.connected[i];
-				if(!(wm_points.has(s))) continue; //überspringe Host
-				var name = wm_names.get(s);
-				var value = wm_points.get(s);
-				scoresText += "<li>" + name + ": " + value + "</li>";
-			}
-			io.emit('score', scoresText);
+			showResults();
 		}
 	});
 	
 	socket.on('disconnect', function() {
-      io.emit('chat message', wm_names.get(socket) + " disconnected.");
-	  if(wm_startingPlayer.has(socket)) { //wenn dieser Player mitgespielt hat
-		startingConntectedPlayers--; //need one less 
-	  }
-	  if(startingConntectedPlayers == 0) { //letzter aktiver Spieler verlässt
-		gameOver = 1;
-		io.emit('actNextB'); //ak nextButton
-	  }
-	  refreshPlayerlist();
+		io.emit('chat message', wm_names.get(socket) + " disconnected.");
+		if(wm_startingPlayer.has(socket)) { //wenn dieser Player mitgespielt hat
+			startingConntectedPlayers--; //need one less 
+		}
+		if(startingConntectedPlayers == 0) { //letzter aktiver Spieler verlässt
+			gameOver = 1;
+			io.emit('actNextB'); //ak nextButton
+		} else {
+			var tipps = 0
+			for (var i in io.sockets.connected) {
+				var s = io.sockets.connected[i];
+				if(wm.has(s)) {
+					console.log("value: " + wm.get(s))
+					tipps++;
+				}
+			}
+			if(startingConntectedPlayers == tipps) {
+				//Game over, show results
+				showResults();
+			}
+		}
+		refreshPlayerlist();
 	});
 });
 
 http.listen(port, function(){
   console.log('listening on *:' + port);
 });
+
+function showResults() {
+	//Game over, show results
+	gameOver = 1;
+	io.emit('actNextB'); //ak nextButton
+	io.emit('clickAmount', video_clicks);
+	
+	var win_s = []; //Liste von Gewinnern
+	var diff = 9007199254740992;
+	var voteList = "";
+	for (var i in io.sockets.connected) { //player with lowest diff
+		s = io.sockets.connected[i];
+		if(!(wm_points.has(s))) continue; //überspringe Host
+		console.log(video_clicks);
+		if(Math.abs(wm.get(s) - video_clicks) < diff) {
+			win_s = []; //array leeren, gibt nur einen Besten(Fall zwei zuvor haben sie selbe nicht minDiff-Wertung)
+			win_s[0] = s;
+			diff = Math.abs(wm.get(s) - video_clicks);
+		} else if(Math.abs(wm.get(s) - video_clicks) == diff) {
+			win_s.push(s);
+		}
+		//add player to VoteList
+		voteList += "<li>" + wm_names.get(s) + ": " + wm.get(s) + "</li>";
+	}
+	io.emit('vote', voteList); //send VoteList
+	
+	//add points
+	var value = wm.get(win_s[0]);
+	var addPoints = 0;
+	if(value == video_clicks && video_clicks != 0) {
+		addPoints = video_clicks;
+	} else {
+		addPoints = 1;
+	}
+	addPoints = addPoints * multipl;
+	multipl = 1; //nur für diese Runde
+	
+	for (var i = 0; i < win_s.length; i++) {
+		var p_addPoints = addPoints;
+		var win = win_s[i];
+		if(wm_fish.has(win)) p_addPoints = p_addPoints * 2; //fishcard aktiviert
+		var newScore = parseInt(p_addPoints) + parseInt(wm_points.get(win));
+		wm_points.set(win, newScore);
+		
+		//send winning message
+		var name = wm_names.get(win);
+		var message = name + " won with an estimation of " + wm.get(win_s[i]) + " clicks and get " + p_addPoints + " Points.";
+		io.emit('chat message', message);
+	}
+		
+	//show all scores
+	var scoresText = "";
+	for (var i in io.sockets.connected) { //player with lowest diff
+		s = io.sockets.connected[i];
+		if(!(wm_points.has(s))) continue; //überspringe Host
+		var name = wm_names.get(s);
+		var value = wm_points.get(s);
+		scoresText += "<li>" + name + ": " + value + "</li>";
+	}
+	io.emit('score', scoresText);
+}
 
 function refreshPlayerlist() {
 	var pl = "";
