@@ -26,13 +26,26 @@
 	  #scores li:nth-child(odd) { background: #eee; }
 	  #playerlist { list-style-type: none; margin: 0; padding: 0; }
 	  #playerlist li:nth-child(odd) { background: #eee; }
+	  .input { 
+		font-size:60px;
+		padding:10px;
+		margin:5px;
+		border-radius: 10px;
+		width:7.6em;
+	  }
 	  .button { 
 		font-size:60px;
 		padding:10px;
 		margin:5px;
 		border-radius: 10px;
 		width:7.6em;
-	  }	
+		border: 2px solid #4CAF50;
+	  }
+	  .button:hover:enabled {
+		background-color: #4CAF50;
+		color: white;
+		cursor:pointer;
+	  }
 	  #votes li { padding:5px 10px; font-size:40px}
 	  #scores li { padding:5px 10px; font-size:40px}
 	  #playerlist li { padding:5px 10px; font-size:40px}
@@ -52,7 +65,7 @@
   <body >
 	<div class="backgroundTop">
 		<div style="font-size:24px; padding:10px;">
-			<input class="button" style= "" id="name" autocomplete="off" autofocus/>
+			<input class="input" style= "" id="name" autocomplete="off" autofocus/>
 			<button class="button" id="change" style="float: right;">changeName</button>
 		</div>
 		<div style="font-size:24px; padding:10px;">

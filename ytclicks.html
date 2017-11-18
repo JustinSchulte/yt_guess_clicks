@@ -5,22 +5,23 @@
 	<style>
       * { margin: 0; padding: 0; box-sizing: border-box; font-size:16px;}
       body { font: 13px Helvetica, Arial; }
-      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
-      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; border-radius: 6px;}
-      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; border-radius: 6px; font-size:20px;}
+      footer {background: #fff; position: fixed; bottom: 0; width: 100%; height: 250px; }
+      #m { border: 0; border: 2px ; padding: 10px; width: 90%; margin-right: .5%; border-radius: 6px; font-size:19px;}
+      #g { width: 9%; border: 2px solid #008CBA; padding: 10px; border-radius: 6px; font-size:19px;}
+	  #g:hover:enabled {background-color: #008CBA; color:white; cursor:pointer;}
       #messages { list-style-type: none; margin: 0; padding: 0; }
       #messages li { padding: 5px 10px; }
       #messages li:nth-child(odd) { background: #eee; }
       #messages { margin-bottom: 40px }
-	  #wrapper div, iframe {float: left;padding: 20px;}
+	  #wrapper div, iframe {float: left;padding-left: 20px;padding-right: 20px;}
 	  .flex-container {
 		display: flex;
 		flex-direction: column;
 	  }
 	  #votes { list-style-type: none; margin: 0; padding: 0; }
-	  #votes li:nth-child(odd) { background: #eee; }
+	  #votes li:nth-child(odd) { background: #fff; }
 	  #scores { list-style-type: none; margin: 0; padding: 0; }
-	  #scores li:nth-child(odd) { background: #eee; }
+	  #scores li:nth-child(odd) { background: #fff; }
 	  #playerlist { list-style-type: none; margin: 0; padding: 0; }
 	  #playerlist li:nth-child(odd) { background: #eee; }
 	  .button { 
@@ -28,64 +29,77 @@
 		padding:5px;
 		border-radius: 6px;
 		width:6em;
-	  }	
+		border: 2px solid #4CAF50;
+	  }
+	  .button:hover:enabled {
+		background-color: #4CAF50;
+		color: white;
+		cursor:pointer;
+	  }
 	  #votes li { padding:5px 10px; font-size:22px}
 	  #scores li { padding:5px 10px; font-size:22px}
 	  #playerlist li { padding:5px 10px; font-size:22px}
-	  .backgroundMain {
+	  .backgroundTop {
 		background-size:cover;
 	  }
-	  .backgroundTop {
+	  body, html {
+		height: 100%;
+	  }
+	  #contentWrapper {
+		min-height:100%;
+		position:relative;
 		background-size:cover;
 	  }
     </style>
   </head>
   <body >
-	<div class="backgroundTop" style="font-size:24px; padding:10px;">
-		<a href="/" style="text-decoration: none; margin-right: 20px;">
-			<img id="icon" src="" alt="Icon" style="width:32px;height:32px;">
-		</a>
-		<span style="color:white;font-size:24px">Name:</span> <input style= "font-size:24px; width:10em; padding:5px; border-radius: 6px;" id="name" autocomplete="off" autofocus/>
-		<button class="button" id="change">change</button>
-		<button class="button" id="fish" style="margin-left: 100px; background-size:contain;color:transparent;background-repeat:no-repeat;background-position:center;">F</button>
-		<button class="button" id="next" style="margin-left: 100px;">nextVideo</button>
-		<div style="float: right;">
-		<input type="checkbox" style="font-size: 200%;" id="localHost" name="localHost" value="host">
-		<label for="localHost" style="color:white;font-size:20px;">Hot Seat Game?<label>
-		</div>
-	</div>
-	<hr>
-	<div class="flex-container">
-		<div class="backgroundMain" id="wrapper">
-			<div>
-				<p style="font-size:30px;">Playerlist</p><br>
-				<ul id="playerlist"></ul>
-			</div>
-			<iframe id="stage" width="1120" height="630" src="" frameborder="0" allowfullscreen></iframe>
-			<div>
-				<p id="clickView" style="font-size:30px;">Clicks: ???</p>
-				<br>
-				<br>
-				<br>
-				<div>
-					<p style="font-size:30px;">Guesses</p><br>
-					<ul id="votes"></ul>
-				</div>
-				<div>
-					<p style="font-size:30px;">Points</p><br>
-					<ul id="scores"></ul>
-				</div>
+	<div id="contentWrapper">
+		<div class="backgroundTop" style="font-size:24px; padding:5px;">
+			<a href="/" style="text-decoration: none; margin-right: 20px;">
+				<img id="icon" src="" alt="Icon" style="width:32px;height:32px;">
+			</a>
+			<span style="color:white;font-size:24px">Name:</span> <input style= "font-size:24px; width:10em; padding:5px; border-radius: 6px;" id="name" autocomplete="off" autofocus/>
+			<button class="button" id="change">change</button>
+			<button class="button" id="fish" style="margin-left: 100px; background-size:contain;color:transparent;background-repeat:no-repeat;background-position:center;">F</button>
+			<button class="button" id="next" style="margin-left: 100px;">nextVideo</button>
+			<div style="float: right;">
+			<input type="checkbox" style="font-size: 200%;" id="localHost" name="localHost" value="host">
+			<label for="localHost" style="color:white;font-size:20px;">Hot Seat Game?<label>
 			</div>
 		</div>
 		<hr>
-		<div id=scrolldiv style="overflow-y: scroll; height:250px;">
-		<ul id="messages" ></ul>
+		<div class="flex-container" style="padding-bottom:250px;">
+			<div class="backgroundMain" id="wrapper">
+				<div style="padding:20px">
+					<p style="font-size:30px;">Playerlist</p><br>
+					<ul id="playerlist"></ul>
+				</div>
+				<iframe id="stage" width="1120" height="630" src="" frameborder="0" allowfullscreen></iframe>
+				<div style="padding:20px">
+					<p id="clickView" style="font-size:30px;">Clicks: ???</p>
+					<br>
+					<br>
+					<br>
+					<div>
+						<p style="font-size:30px;">Guesses</p><br>
+						<ul id="votes"></ul>
+					</div>
+					<div>
+						<p style="font-size:30px;">Points</p><br>
+						<ul id="scores"></ul>
+					</div>
+				</div>
+			</div>
 		</div>
+		<footer id="footbox">
+			<div id=scrolldiv style="overflow-y: scroll; height:200px; border-left: 6px solid #4CAF50;">
+				<ul id="messages" ></ul>
+			</div>
+			<div id="former" style="background: #000; padding: 3px;">
+				<input id="m" autocomplete="off" /><button id="g">Guess</button>
+			</div>
+		</footer>
 	</div>
-	
-    <form action="" id="former">
-      <input id="m" autocomplete="off" /><button id="g">Guess</button>
-    </form>
     <script src="/scripts/socket.io-1.2.0.js"></script>
     <script src="/scripts/jquery-1.11.1.js"></script>
     <script>
@@ -139,7 +153,7 @@
 				$('#name').prop("disabled",true);
 				$('#change').prop("disabled",true);
 				$('#fish').css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/no_fishcard.png)");
-				$('#former').css("display", "none");
+				$('#footbox').css("display", "none");
 				document.getElementById("stage").width = "1600";
 				document.getElementById("stage").height = "900";
 			} else {
@@ -151,12 +165,17 @@
 				$('#name').prop("disabled",false);
 				$('#change').prop("disabled",false);
 				$('#fish').css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/fishcard.png)");
-				$('#former').css("display", "inline");
+				$('#footbox').css("display", "");
 				document.getElementById("stage").width = "1120";
 				document.getElementById("stage").height = "630";
 			}
 		});
-        $('form').submit(function(){
+		$("#m").keyup(function(event) {
+			if (event.keyCode === 13) {
+				$("#g").click();
+			}
+		});
+        $('#g').click(function(){
 		  var guess = parseInt($('#m').val());
 		  console.log(guess);
 		  if(isNaN(guess)) { //keine Nummer eingegeben
@@ -214,7 +233,7 @@
 		socket.on('setIPPORT', function(s_ip, s_port){
 		  ipAdresse = s_ip;
 		  port = s_port;
-		  $(".backgroundMain").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/back3.jpg)");
+		  $("#contentWrapper").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/back3.jpg)");
 		  $(".backgroundTop").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/top3.jpg)");
 		  $("#fish").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/fishcard.png)");
 		  $("#icon").attr("src","http://" + ipAdresse + ":" + port + "/images/teewurst_icon_white.ico");
