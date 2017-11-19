@@ -6,26 +6,19 @@
 		
       * { margin: 0; padding: 0; box-sizing: border-box; font-size:16px;}
       body { font: 13px Helvetica, Arial; text-size-adjust: none;}
-      form {background: #fff; position: fixed; bottom: 0; font-size:80px;}
-	  #r_form{background: #000;padding: 3px; width: 100%;}
-	  #scrolldiv{border-left: 6px solid #32CD32; border-top: 6px solid #32CD32; background-color: #ffffff;}
-      form input { border: 0; padding: 10px; width: 70%; margin-right: .5%; border-radius: 6px;font-size:80px}
-      form button { width: 29%; background: rgb(130, 224, 255); border: none; padding: 10px; border-radius: 6px;font-size:80px}
+	  
+	  footer {background: #fff; position: fixed; bottom: 0; width: 100%; height: 525px; }
+      #m { border: 0; border: 2px ; padding: 10px; width: 70%; margin-right: .5%; border-radius: 6px; font-size:80px;}
+      #g { width: 29%; border: 2px solid #008CBA; padding: 10px; border-radius: 6px; font-size:80px;}
+	  #g:hover:enabled {background-color: #008CBA; color:white; cursor:pointer;}
+	  
       #messages { list-style-type: none; margin: 0; padding: 0;font-size:40px}
       #messages li { padding: 5px 10px;font-size:40px; max-height: 999999px;}
       #messages li:nth-child(odd) { background: #eee; }
-      #messages { margin-bottom: 40px }
-	  #wrapper div, iframe {float: left;padding: 10px;}
-	  .flex-container {
-		display: flex;
-		flex-direction: column;
-	  }
-	  #votes { list-style-type: none; margin: 0; padding: 0; }
-	  #votes li:nth-child(odd) { background: #eee; }
-	  #scores { list-style-type: none; margin: 0; padding: 0; }
-	  #scores li:nth-child(odd) { background: #eee; }
+      #messages { margin-bottom: 0px }
 	  #playerlist { list-style-type: none; margin: 0; padding: 0; }
 	  #playerlist li:nth-child(odd) { background: #eee; }
+	  #playerlist li { padding:5px 10px; font-size:40px}
 	  .input { 
 		font-size:60px;
 		padding:10px;
@@ -46,10 +39,6 @@
 		color: white;
 		cursor:pointer;
 	  }
-	  #votes li { padding:5px 10px; font-size:40px}
-	  #scores li { padding:5px 10px; font-size:40px}
-	  #playerlist li { padding:5px 10px; font-size:40px}
-	  
 	  html, body, .flex-container {
 		height: 100%;
 	  }	
@@ -60,52 +49,58 @@
 	  .backgroundTop {
 		background-size:cover;
 	  }
+	  #contentWrapper {
+		min-height:100%;
+		position:relative;
+		background-size:cover;
+	  }
+	  th {
+		text-align: center;
+		padding: 10px;
+		padding-top: 0px;
+		font-weight:normal;
+		font-size:60px
+	  }
+	  td {
+		text-align: center;
+		padding: 10px;
+		font-size:50px;
+	  }
+	  tr:nth-child(even) {
+		background-color: #ffffff;
+	  }
     </style>
   </head>
   <body >
-	<div class="backgroundTop">
-		<div style="font-size:24px; padding:10px;">
-			<input class="input" style= "" id="name" autocomplete="off" autofocus/>
-			<button class="button" id="change" style="float: right;">changeName</button>
-		</div>
-		<div style="font-size:24px; padding:10px;">
-			<button class="button" id="fish" style="background-size:contain;color:transparent;background-repeat:no-repeat;background-position:center;">F</button>
-			<button class="button" id="next" style="float: right;">nextVideo</button>
-		</div>
-	</div>
-	<hr>	
-	<div class="flex-container">
-		<div class="backgroundMain">
+    <div id="contentWrapper">
+		<div class="backgroundTop">
 			<div style="font-size:24px; padding:10px;">
-				<p id="clickView" style="font-size:60px;">Clicks: ???</p>
+				<input class="input" style= "" id="name" autocomplete="off" autofocus/>
+				<button class="button" id="change" style="float: right;">changeName</button>
 			</div>
-			<hr>
-			<div id="wrapper">
-				<div>
-					<p style="font-size:60px;">Playerlist</p><br>
-					<ul id="playerlist"></ul>
-				</div>
-				<div>
-					<p style="font-size:60px;">Guesses</p><br>
-					<ul id="votes"></ul>
-				</div>
-				<div>
-					<p style="font-size:60px;">Points</p><br>
-					<ul id="scores"></ul>
-				</div>
+			<div style="font-size:24px; padding:10px;">
+				<button class="button" id="fish" style="background-size:contain;color:transparent;background-repeat:no-repeat;background-position:center;">F</button>
+				<button class="button" id="next" style="float: right;">nextVideo</button>
 			</div>
 		</div>
+		<div class="flex-container" style="padding-bottom:525px;">
+			<div class="backgroundMain">
+				<div style="font-size:24px; padding:10px;">
+					<p id="clickView" style="font-size:80px;">Clicks: ???</p>
+				</div>
+				<hr>
+				<table id="scores" style="width:100%;"></table>
+			</div>
+		</div>
+		<footer id="footbox">
+			<div id=scrolldiv style="overflow-y: scroll; height:400px; border-left: 10px solid #4CAF50;">
+				<ul id="messages" ></ul>
+			</div>
+			<div id="former" style="background: #000; padding: 3px;">
+				<input id="m" autocomplete="off" /><button id="g">Guess</button>
+			</div>
+		</footer>
 	</div>
-	
-    <form action="" >
-	<hr>
-		<div id=scrolldiv style="overflow-y: scroll; height:400px;">
-			<ul id="messages" style="font-size:40px"></ul>
-		</div>
-		<div id="r_form">
-			<input id="m" autocomplete="off" /><button>Guess</button>
-		</div>
-    </form>
     <script src="/scripts/socket.io-1.2.0.js"></script>
     <script src="/scripts/jquery-1.11.1.js"></script>
     <script>
@@ -115,6 +110,7 @@
 		var ipAdresse = "";
 		var port = "";
         var socket = io();
+		var ALLOWED_TO_PLAY = false;
 		
 	    //CONNECT TO Game
 		socket.emit('gameConnection');
@@ -148,7 +144,13 @@
 		  $('#fish').css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/no_fishcard.png)");
 	      socket.emit('fish');
 		});
-        $('form').submit(function(){
+        //Guess-Leiste Events
+		$("#m").keyup(function(event) {
+			if (event.keyCode === 13) {
+				$("#g").click();
+			}
+		});
+        $('#g').click(function(){
 		  var guess = parseInt($('#m').val());
 		  console.log(guess);
 		  if(isNaN(guess)) { //keine Nummer eingegeben
@@ -163,6 +165,12 @@
 			$('#m').val('');
 			return false;
 		  }
+		  if(!ALLOWED_TO_PLAY) { //new player, not allowed to vote
+			$('#messages').append($('<li>').text("You have to wait till next round!").css('color', 'blue'));
+			$("#scrolldiv").scrollTop($("#scrolldiv")[0].scrollHeight);
+			$('#m').val('');
+			return false;
+		  }
 
           socket.emit('chat message', guess);
 		  $('#messages').append($('<li>').text("You guessed " + $('#m').val() + " clicks.").css('color', 'blue'));
@@ -170,12 +178,15 @@
           $('#m').val('');
           return false;
         });
+		
+		//SOCKET ON BEGIN
         socket.on('chat message', function(msg){
           $('#messages').append($('<li>').text(msg));
 		  $("#scrolldiv").scrollTop($("#scrolldiv")[0].scrollHeight);
           //window.scrollTo(0, document.body.scrollHeight);
         });
 		socket.on('nv', function(vid){
+		  ALLOWED_TO_PLAY = true;
 		  $("#clickView").html("Clicks: ???");
           console.log("new ID: " + vid);
 		  var url = "http://www.youtube.com/embed/" + vid + "?autoplay=1"; //&controls=0
@@ -201,12 +212,12 @@
 		socket.on('clickAmount', function(clicks){
 		  $('#messages').append($('<li>').text("The video has " + clicks + " clicks!").css({'color': 'red', 'font-weight': 'bold' }));
 		  $("#scrolldiv").scrollTop($("#scrolldiv")[0].scrollHeight);
-		  $("#clickView").html("Clicks: " + "<span style=\"color:#f00;font-size:60px;\">" + clicks + "</span>");
+		  $("#clickView").html("Clicks: " + "<span style=\"color:#f00;font-size:80px;\">" + clicks + "</span>");
 		});
 		socket.on('setIPPORT', function(s_ip, s_port){
 		  ipAdresse = s_ip;
 		  port = s_port;
-		  $(".backgroundMain").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/back3.jpg)");
+		  $("#contentWrapper").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/back3.jpg)");
 		  $(".backgroundTop").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/top3.jpg)");
 		  $("#fish").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/fishcard.png)");
 		});

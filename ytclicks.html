@@ -18,12 +18,9 @@
 		display: flex;
 		flex-direction: column;
 	  }
-	  #votes { list-style-type: none; margin: 0; padding: 0; }
-	  #votes li:nth-child(odd) { background: #fff; }
-	  #scores { list-style-type: none; margin: 0; padding: 0; }
-	  #scores li:nth-child(odd) { background: #fff; }
 	  #playerlist { list-style-type: none; margin: 0; padding: 0; }
 	  #playerlist li:nth-child(odd) { background: #eee; }
+	  #playerlist li { padding:5px 10px; font-size:22px}
 	  .button { 
 		font-size:24px;
 		padding:5px;
@@ -49,9 +46,6 @@
 		color: white;
 		cursor:pointer;
 	  }
-	  #votes li { padding:5px 10px; font-size:22px}
-	  #scores li { padding:5px 10px; font-size:22px}
-	  #playerlist li { padding:5px 10px; font-size:22px}
 	  .backgroundTop {
 		background-size:cover;
 	  }
@@ -61,12 +55,27 @@
 	  iframe {
 		border: 2px solid #f44336;
 		border-radius: 1px;
-		margin: -1px
+		margin: -1px;
+		margin-top: 0px;
 	  }
 	  #contentWrapper {
 		min-height:100%;
 		position:relative;
 		background-size:cover;
+	  }
+	  th {
+		text-align: center;
+		padding: 10px;
+		font-weight:normal;
+		font-size:30px
+	  }
+	  td {
+		text-align: center;
+		padding: 10px;
+		font-size:22px
+	  }
+	  tr:nth-child(even) {
+		background-color: #ffffff;
 	  }
     </style>
   </head>
@@ -94,7 +103,7 @@
 				</div>
 				<iframe id="stage" width="1120" height="630" src="" frameborder="0" allowfullscreen></iframe>
 				<div>
-					<button class="button2" id="plusSize">+</button>
+					<button class="button2" id="plusSize" style="margin-top: 0px;">+</button>
 					<br>
 					<button class="button2" id="minusSize">-</button>
 				</div>
@@ -104,12 +113,7 @@
 					<br>
 					<br>
 					<div>
-						<p style="font-size:30px;">Guesses</p><br>
-						<ul id="votes"></ul>
-					</div>
-					<div>
-						<p style="font-size:30px;">Points</p><br>
-						<ul id="scores"></ul>
+						<table id="scores"></table>
 					</div>
 				</div>
 			</div>
@@ -133,6 +137,7 @@
         var socket = io();
 		var frameX = 1120;
 		var frameY = 630;
+		var ALLOWED_TO_PLAY = false;
 		
 		//CONNECT TO Game
 		socket.emit('gameConnection');
@@ -199,11 +204,7 @@
 				document.getElementById("stage").height = frameY;
 			}
 		});
-		$("#m").keyup(function(event) {
-			if (event.keyCode === 13) {
-				$("#g").click();
-			}
-		});
+		//smaller+bigger Buttons
 		$("#plusSize").click(function() {
 			//bigger Iframe
 			if(frameY >= 1080) return
@@ -220,6 +221,12 @@
 			document.getElementById("stage").width = frameX;
 			document.getElementById("stage").height = frameY;
 		})
+		//Guess-Leiste Events
+		$("#m").keyup(function(event) {
+			if (event.keyCode === 13) {
+				$("#g").click();
+			}
+		});
         $('#g').click(function(){
 		  var guess = parseInt($('#m').val());
 		  console.log(guess);
@@ -235,6 +242,12 @@
 			$('#m').val('');
 			return false;
 		  }
+		  if(!ALLOWED_TO_PLAY) { //new player, not allowed to vote
+			$('#messages').append($('<li>').text("You have to wait till next round!").css('color', 'blue'));
+			$("#scrolldiv").scrollTop($("#scrolldiv")[0].scrollHeight);
+			$('#m').val('');
+			return false;
+		  }
 
           socket.emit('chat message', guess);
 		  $('#messages').append($('<li>').text("You guessed " + $('#m').val() + " clicks.").css('color', 'blue'));
@@ -242,17 +255,20 @@
           $('#m').val('');
           return false;
         });
+		
+		//SOCKET ON BEGIN
         socket.on('chat message', function(msg){
           $('#messages').append($('<li>').text(msg));
 		  $("#scrolldiv").scrollTop($("#scrolldiv")[0].scrollHeight);
           //window.scrollTo(0, document.body.scrollHeight);
         });
 		socket.on('nv', function(vid){
+		  ALLOWED_TO_PLAY = true;
           console.log("new ID: " + vid);
 		  var url = "http://www.youtube.com/embed/" + vid + "?autoplay=1&iv_load_policy=3"; //&controls=0
 		  console.log("URL:" + url + ".");
 		  document.getElementById('stage').src = url;
-		  $("#clickView").html("Clicks: ???");
+		  $("#clickView").html("Clicks: ???");  
         });
 		
 		socket.on('vote', function(voteText){

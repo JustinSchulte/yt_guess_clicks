@@ -182,6 +182,7 @@ io.on('connection', function(socket){
 	socket.on('chat message', function(msg){ //Nur zum Tippen der Clicks
 		if(video_clicks == -1) return; //erstes Video
 		if(gameOver == 1) return;
+		if(!(wm_startingPlayer.has(socket))) return //neuer Spieler darf nicht voten
 		wm.set(socket, msg);
 		
 		var tipps = 0
@@ -252,10 +253,7 @@ function showResults() {
 		} else if(Math.abs(wm.get(s) - video_clicks) == diff) {
 			win_s.push(s);
 		}
-		//add player to VoteList
-		voteList += "<li>" + wm_names.get(s) + ": " + wm.get(s) + "</li>";
 	}
-	io.emit('vote', voteList); //send VoteList
 	
 	//add points
 	var value = wm.get(win_s[0]);
@@ -281,14 +279,15 @@ function showResults() {
 		io.emit('chat message', message);
 	}
 		
-	//show all scores
-	var scoresText = "";
+	//show all scores and guesses
+	var scoresText = "<tr><th></th><th>Guess</th><th>Score</th></tr>";
 	for (var i in io.sockets.connected) { //player with lowest diff
 		s = io.sockets.connected[i];
 		if(!(wm_points.has(s))) continue; //überspringe Host
 		var name = wm_names.get(s);
 		var value = wm_points.get(s);
-		scoresText += "<li>" + name + ": " + value + "</li>";
+		var guess = wm.get(s);
+		scoresText += "<tr><td>" + name + "</td><td>" + guess + "</td><td>" + value + "</td></tr>";
 	}
 	io.emit('score', scoresText);
 }
