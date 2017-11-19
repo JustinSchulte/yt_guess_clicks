@@ -12,8 +12,8 @@
       #messages { list-style-type: none; margin: 0; padding: 0; }
       #messages li { padding: 5px 10px; }
       #messages li:nth-child(odd) { background: #eee; }
-      #messages { margin-bottom: 40px }
-	  #wrapper div, iframe {float: left;padding-left: 20px;padding-right: 20px;}
+      #messages { margin-bottom: 0px }
+	  #wrapper div, iframe {float: left;}
 	  .flex-container {
 		display: flex;
 		flex-direction: column;
@@ -36,6 +36,19 @@
 		color: white;
 		cursor:pointer;
 	  }
+	  .button2 { 
+		font-size:20px;
+		padding:5px;
+		border-radius: 1px;
+		width:2em;
+		border: 2px solid #f44336;
+		margin : -1px;
+	  }
+	  .button2:hover:enabled {
+		background-color: #f44336;
+		color: white;
+		cursor:pointer;
+	  }
 	  #votes li { padding:5px 10px; font-size:22px}
 	  #scores li { padding:5px 10px; font-size:22px}
 	  #playerlist li { padding:5px 10px; font-size:22px}
@@ -44,6 +57,11 @@
 	  }
 	  body, html {
 		height: 100%;
+	  }
+	  iframe {
+		border: 2px solid #f44336;
+		border-radius: 1px;
+		margin: -1px
 	  }
 	  #contentWrapper {
 		min-height:100%;
@@ -54,7 +72,7 @@
   </head>
   <body >
 	<div id="contentWrapper">
-		<div class="backgroundTop" style="font-size:24px; padding:5px;">
+		<div class="backgroundTop" style="font-size:24px; padding:5px">
 			<a href="/" style="text-decoration: none; margin-right: 20px;">
 				<img id="icon" src="" alt="Icon" style="width:32px;height:32px;">
 			</a>
@@ -75,6 +93,11 @@
 					<ul id="playerlist"></ul>
 				</div>
 				<iframe id="stage" width="1120" height="630" src="" frameborder="0" allowfullscreen></iframe>
+				<div>
+					<button class="button2" id="plusSize">+</button>
+					<br>
+					<button class="button2" id="minusSize">-</button>
+				</div>
 				<div style="padding:20px">
 					<p id="clickView" style="font-size:30px;">Clicks: ???</p>
 					<br>
@@ -108,6 +131,8 @@
 		var ipAdresse = "";
 		var port = "";
         var socket = io();
+		var frameX = 1120;
+		var frameY = 630;
 		
 		//CONNECT TO Game
 		socket.emit('gameConnection');
@@ -154,8 +179,10 @@
 				$('#change').prop("disabled",true);
 				$('#fish').css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/no_fishcard.png)");
 				$('#footbox').css("display", "none");
-				document.getElementById("stage").width = "1600";
-				document.getElementById("stage").height = "900";
+				frameX = 1600;
+				frameY = 900;
+				document.getElementById("stage").width = frameX;
+				document.getElementById("stage").height = frameY;
 			} else {
 				socket.emit('stopLocal');
 				$('#fish').prop("disabled",false);
@@ -166,8 +193,10 @@
 				$('#change').prop("disabled",false);
 				$('#fish').css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/fishcard.png)");
 				$('#footbox').css("display", "");
-				document.getElementById("stage").width = "1120";
-				document.getElementById("stage").height = "630";
+				frameX = 1120;
+				frameY = 630;
+				document.getElementById("stage").width = frameX;
+				document.getElementById("stage").height = frameY;
 			}
 		});
 		$("#m").keyup(function(event) {
@@ -175,6 +204,22 @@
 				$("#g").click();
 			}
 		});
+		$("#plusSize").click(function() {
+			//bigger Iframe
+			if(frameY >= 1080) return
+			frameX = frameX + 80;
+			frameY = frameY + 45;
+			document.getElementById("stage").width = frameX;
+			document.getElementById("stage").height = frameY;
+		})
+		$("#minusSize").click(function() {
+			//smaller Iframe
+			if(frameY <= 90) return
+			frameX = frameX - 80;
+			frameY = frameY - 45;
+			document.getElementById("stage").width = frameX;
+			document.getElementById("stage").height = frameY;
+		})
         $('#g').click(function(){
 		  var guess = parseInt($('#m').val());
 		  console.log(guess);
