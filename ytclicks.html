@@ -188,6 +188,7 @@
 				frameY = 900;
 				document.getElementById("stage").width = frameX;
 				document.getElementById("stage").height = frameY;
+				ALLOWED_TO_PLAY = false;
 			} else {
 				socket.emit('stopLocal');
 				$('#fish').prop("disabled",false);
