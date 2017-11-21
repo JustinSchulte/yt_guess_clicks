@@ -60,6 +60,8 @@ io.on('connection', function(socket){
 			startingConntectedPlayers--;
 			if(startingConntectedPlayers == 0) {
 				gameOver = 1;
+				io.emit('actNextB'); //ak nextButton
+				multipl = 1;
 			}
 		}
 		//lösche Spieler aus allen Listen
@@ -211,6 +213,7 @@ io.on('connection', function(socket){
 		if(startingConntectedPlayers == 0) { //letzter aktiver Spieler verlässt
 			gameOver = 1;
 			io.emit('actNextB'); //ak nextButton
+			multipl = 1;
 		} else {
 			var tipps = 0
 			for (var i in io.sockets.connected) {

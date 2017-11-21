@@ -282,6 +282,7 @@
 		  $('#playerlist').html(voteText);// + symbol + "</li>");
 		});
 		socket.on('actNextB', function(scoreText){
+		  if(($('#localHost').is(':checked'))) return; 
 		  $('#next').prop("disabled",false);
 		});
 		socket.on('deactNextB', function(scoreText){
