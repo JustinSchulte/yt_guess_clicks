@@ -42,6 +42,8 @@
 			<button class="button" id="yt">YT-Clicks</button>
 			<br>
 			<button class="button" id="yt_m">YT-Clicks Mobile</button>
+			<br>
+			<button class="button" id="mo">Montagsmaler</button>
 		</div>
 		
 		
@@ -61,6 +63,9 @@
 				});
 				$("#yt_m").click(function() {
 					window.location = "/ytclicks/mobile";
+				});
+				$("#mo").click(function() {
+					window.location = "/montagsmaler";
 				});
 				socket.on('setIPPORT', function(s_ip, s_port){
 					ipAdresse = s_ip;

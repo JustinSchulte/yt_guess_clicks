@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+  <head>
+    <title>YT-Clicks</title>
+	<style>
+      * { margin: 0; padding: 0; box-sizing: border-box; font-size:16px;}
+      body {  font: 24px Helvetica, Arial; display:flex; flex-direction: column;}
+	  html, body{
+		height: 100%;
+	  }
+	  .backgroundMain {
+		background-size:cover;
+		flex-grow: 1;
+	  }
+	  .button { 
+		font-size:24px;
+		padding:5px;
+		border-radius: 6px;
+		width:6em;
+		border: 2px solid #4CAF50;
+	  }
+	  .button:hover:enabled {
+		background-color: #4CAF50;
+		color: white;
+		cursor:pointer;
+	  }
+    </style>
+  </head>
+  <body >
+		<div class="backgroundTop" style="font-size:24px; padding:5px">
+			<a href="/" style="text-decoration: none; margin-right: 20px;">
+				<img id="icon" src="" alt="Icon" style="width:32px;height:32px;">
+			</a>
+			<span style="color:white;font-size:24px">Montagsmaler</span>
+		</div>
+		<div class="backgroundMain">
+			<div align="center">
+				<h1>Montagsmaler v1.4</h1>
+				<h2><u>Client</u></h2>
+				<h3> Ich besitze eine alte Version oder Java (oder wollte es mir eh mal 
+					<a href="http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html" target="_blank">herunterladen</a>):
+				</h3>
+				<a href="https://mega.nz/#!z9VGTRBT!CkLUfPN6ZzsmGUbbRqmdal0mD9HE4d7j4MuzjvU1mTQ" target="_blank">JAR-Client Download-Link (97 KB)</a>
+				<br>
+				<br>
+				<br>
+				<h3> Ich will kein Java, sondern nur die portable Version:</h3>
+				<b>Windows:  </b><a href="https://mega.nz/#!708EkDSZ!8Fil5GG62yEWMht0dNs5_FRGqznj0T_DYeLCx0G2wcY" target="_blank">ZIP-Client Download-Link (62.7 MB)</a>
+				<br>
+				<br>
+				<b>Linux:  </b><a href="https://mega.nz/#!esNE3ChL!-OHgIbHv04tcr4w9D1Fq_UZcszGFSZapslQwAdYe4Qc" target="_blank">ZIP-Client Download-Link (68.4 MB)</a>
+
+
+				<br>
+				<br>
+				<br>
+				<br>
+				<br>
+				<br>
+				<br>
+				<br>
+				<br>
+				<br>
+
+
+				<h2><u>Server</u></h2>
+				<h3> Ich besitze eine alte Version oder Java (oder wollte es mir eh mal 
+					<a href="http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html" target="_blank">herunterladen</a>):
+				</h3>
+				<a href="https://mega.nz/#!K9FAiZKA!Uk2RExFRwHkADWzf3ENK0Op_1pwkOY5HPqOPyzFtUJU" target="_blank">JAR-Server Download-Link (24 KB)</a>
+				<br>
+				<br>
+				<br>
+				<h3> Ich will kein Java, sondern nur die portable Version:</h3>
+				<b>Windows:  </b><a href="https://mega.nz/#!34lDCAJA!B0K3dgkYNuNnz1dmhgz8F3pWGpg1pEiBP6I__R1UGUo" target="_blank">ZIP-Server Download-Link (62.6 MB)</a>
+				<br>
+				<br>
+				<b>Linux:  </b><a href="https://mega.nz/#!qolFgIYA!3csgTegjwtJ3tbGak2gt0LCWE3ScbiaOAm7KvWgRTOE" target="_blank">ZIP-Server Download-Link (68.3 MB)</a>
+
+			</div>
+		</div>
+    <script src="/scripts/socket.io-1.2.0.js"></script>
+    <script src="/scripts/jquery-1.11.1.js"></script>
+    <script>
+      $(function () {
+		//VARIABLES
+		var ipAdresse = "";
+		var port = "";
+		var socket = io();
+        
+		socket.on('setIPPORT', function(s_ip, s_port){
+		  ipAdresse = s_ip;
+		  port = s_port;
+		  $(".backgroundMain").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/back3.jpg)");
+		  $(".backgroundTop").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/top3.jpg)");
+		  $("#fish").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/fishcard.png)");
+		  $("#icon").attr("src","http://" + ipAdresse + ":" + port + "/images/teewurst_icon_white.ico");
+		});
+      });
+    </script>
+  </body>
+</html>

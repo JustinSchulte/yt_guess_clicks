@@ -36,6 +36,9 @@ app.get('/ytclicks', function(req, res){
 app.get('/ytclicks/mobile',function(req,res){
 	res.sendFile(path.join(__dirname +'/ytclicks/mobile.html'));
 });
+app.get('/montagsmaler', function(req, res){
+	res.sendFile(__dirname + '/montagsmaler.html');
+});
 
 app.use(express.static(path.join(__dirname, 'public')));
 var favicon = require('serve-favicon');
@@ -225,7 +228,9 @@ io.on('connection', function(socket){
 			}
 			if(startingConntectedPlayers == tipps) {
 				//Game over, show results
-				showResults();
+				if(gameOver == 0) {
+					showResults();
+				}				
 			}
 		}
 		refreshPlayerlist();
