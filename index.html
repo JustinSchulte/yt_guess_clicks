@@ -58,14 +58,41 @@
 				var socket = io();
 				
 				
-				$("#yt").click(function() {
-					window.location = "/ytclicks";
+				$("#yt").on('click auxclick contextmenu', function(e) {
+					switch(e.which) {
+						case 1:
+							window.location = "/ytclicks";
+							break;
+						case 2:
+							window.open("/ytclicks");
+							break;
+						case 3:
+							break;
+					}
 				});
-				$("#yt_m").click(function() {
-					window.location = "/ytclicks/mobile";
+				$("#yt_m").on('click auxclick contextmenu', function(e) {
+					switch(e.which) {
+						case 1:
+							window.location = "/ytclicks/mobile";
+							break;
+						case 2:
+							window.open("/ytclicks/mobile");
+							break;
+						case 3:
+							break;
+					}
 				});
-				$("#mo").click(function() {
-					window.location = "/montagsmaler";
+				$("#mo").on('click auxclick contextmenu', function(e) {
+					switch(e.which) {
+						case 1:
+							window.location = "/montagsmaler";
+							break;
+						case 2:
+							window.open("/montagsmaler");
+							break;
+						case 3:
+							break;
+					}
 				});
 				socket.on('setIPPORT', function(s_ip, s_port){
 					ipAdresse = s_ip;
