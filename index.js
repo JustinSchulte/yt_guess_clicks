@@ -1,7 +1,10 @@
 //IP AND PORT
-var ip = "teewurst24.party";
-var portt = "80";
-//IP AND PORT
+var ip = "";
+var portt = "";
+
+//API KEYS
+var apiKey_random = ""; //https://randomyoutube.net/api
+var apiKey_google = ""; //https://developers.google.com/youtube/v3/getting-started
 
 
 var app = require('express')();
@@ -121,7 +124,9 @@ io.on('connection', function(socket){
 		//getRandomVID...
 		var vid = "test";
 		var request = require('request');
-		request('http://randomyoutube.net/api/getvid?api_token=764SPKrj5Bm0oJIMqrii8tCj5rAycyHjGvW0J7dcNvTAlV1B7kpMjsqRitIA', function (error, response, body) {
+		var random_api_url = "http://randomyoutube.net/api/getvid?api_token=" + apiKey_random;
+		console.log(random_api_url);
+		request(random_api_url, function (error, response, body) {
 			if (!error && response.statusCode == 200) {
 				var importedJSON = JSON.parse(body);
 				vid = importedJSON.vid;
@@ -135,9 +140,9 @@ io.on('connection', function(socket){
 				io.emit('nv', vid);
 				
 				//getClicks
-				var y_api_url = "https://www.googleapis.com/youtube/v3/videos?id=" + vid + "%20&part=snippet%2CcontentDetails%2Cstatistics%20&key=AIzaSyAGgtcwTX7vyMrkLMBp7dmevMmIy_XBdS0";
-				console.log(y_api_url);
-				request(y_api_url, function (error, response, body) {
+				var google_api_url = "https://www.googleapis.com/youtube/v3/videos?id=" + vid + "%20&part=snippet%2CcontentDetails%2Cstatistics%20&key=" + apiKey_google;
+				console.log(google_api_url);
+				request(google_api_url, function (error, response, body) {
 					if (!error && response.statusCode == 200) {
 						var importedJSON = JSON.parse(body);
 						console.log(JSON.stringify(importedJSON));
