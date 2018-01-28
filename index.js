@@ -1,10 +1,10 @@
 //IP AND PORT
-var ip = "localhost";
-var portt = "80";
+var ip = "";
+var portt = "";
 
 //API KEYS
-var apiKey_random = "764SPKrj5Bm0oJIMqrii8tCj5rAycyHjGvW0J7dcNvTAlV1B7kpMjsqRitIA";
-var apiKey_google = "AIzaSyAGgtcwTX7vyMrkLMBp7dmevMmIy_XBdS0";
+var apiKey_random = ""; //https://randomyoutube.net/api
+var apiKey_google = ""; //https://developers.google.com/youtube/v3/getting-started
 
 
 var app = require('express')();
