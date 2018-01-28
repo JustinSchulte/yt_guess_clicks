@@ -4,6 +4,7 @@
 Guess the clicks of a random yt-video!
 
 <b>How to Host:</b>  
+<<<<<<< HEAD
 *Firstly get Node.js: https://nodejs.org/en/.
 *Set IP and Port in the first lines of "index.js".
 *Get and set your API keys in the lines just below.
