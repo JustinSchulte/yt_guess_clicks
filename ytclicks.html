@@ -21,6 +21,18 @@
 	  #playerlist { list-style-type: none; margin: 0; padding: 0; }
 	  #playerlist li:nth-child(odd) { background: #eee; }
 	  #playerlist li { padding:5px 10px; font-size:22px}
+	  #skip { 
+		font-size:24px;
+		padding:5px;
+		border-radius: 6px;
+		width:6em;
+		border: 2px solid #008CBA;
+	  }
+	  #skip:hover:enabled {
+		background-color: #008CBA; 
+		color:white; 
+		cursor:pointer;
+	  }
 	  .button { 
 		font-size:24px;
 		padding:5px;
@@ -77,6 +89,7 @@
 	  tr:nth-child(even) {
 		background-color: #ffffff;
 	  }
+	  
     </style>
   </head>
   <body >
@@ -100,6 +113,8 @@
 				<div style="padding:20px">
 					<p style="font-size:30px;">Playerlist</p><br>
 					<ul id="playerlist"></ul>
+					<br>
+					<button id="skip">Skip</button>
 				</div>
 				<iframe style="background: rgba(0,0,0,0.5);" id="stage" width="1120" height="630" src="" frameborder="0" allowfullscreen></iframe>
 				<div>
@@ -138,6 +153,8 @@
 		var frameX = 1120;
 		var frameY = 630;
 		var ALLOWED_TO_PLAY = false;
+		$('#skip').prop("disabled",true);
+		var voted = false;
 		
 		//CONNECT TO Game
 		socket.emit('gameConnection');
@@ -148,9 +165,10 @@
 			if(name.length == 0) { //leeres NamensFeld
 				$('#messages').append($('<li>').text("Enter at least one char.").css('color', 'blue'));
 				$("#scrolldiv").scrollTop($("#scrolldiv")[0].scrollHeight);
+			} else {
+				name = name.substring(0,Math.min(14, name.length)); //max 14 chars
+				socket.emit('change name', name);
 			}
-			name = name.substring(0,Math.min(14, name.length)); //max 14 chars
-			socket.emit('change name', name);
 		});
 		$("#next").click(function() {
 			socket.emit('nextVideo');
@@ -250,12 +268,20 @@
 			return false;
 		  }
 
+		  voted = true;
+		  $('#skip').prop("disabled",false);
           socket.emit('chat message', guess);
 		  $('#messages').append($('<li>').text("You guessed " + $('#m').val() + " clicks.").css('color', 'blue'));
 		  $("#scrolldiv").scrollTop($("#scrolldiv")[0].scrollHeight);
           $('#m').val('');
           return false;
         });
+		
+		//SKIP-FUNCTION
+		$("#skip").click(function() {
+		  $('#skip').prop("disabled",true);
+		  socket.emit('skip');
+		});
 		
 		//SOCKET ON BEGIN
         socket.on('chat message', function(msg){
@@ -265,6 +291,7 @@
         });
 		socket.on('nv', function(vid){
 		  ALLOWED_TO_PLAY = true;
+		  $('#skip').prop("disabled",true);
           console.log("new ID: " + vid);
 		  var url = "http://www.youtube.com/embed/" + vid + "?autoplay=1&iv_load_policy=3"; //&controls=0
 		  console.log("URL:" + url + ".");
@@ -284,6 +311,7 @@
 		socket.on('actNextB', function(scoreText){
 		  if(($('#localHost').is(':checked'))) return; 
 		  $('#next').prop("disabled",false);
+		  $('#skip').prop("disabled",true);
 		});
 		socket.on('deactNextB', function(scoreText){
 		  $('#next').prop("disabled",true);

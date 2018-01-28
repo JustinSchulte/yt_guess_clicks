@@ -1,10 +1,10 @@
 //IP AND PORT
-var ip = "";
-var portt = "";
+var ip = "localhost";
+var portt = "80";
 
 //API KEYS
-var apiKey_random = ""; //https://randomyoutube.net/api
-var apiKey_google = ""; //https://developers.google.com/youtube/v3/getting-started
+var apiKey_random = "764SPKrj5Bm0oJIMqrii8tCj5rAycyHjGvW0J7dcNvTAlV1B7kpMjsqRitIA";
+var apiKey_google = "AIzaSyAGgtcwTX7vyMrkLMBp7dmevMmIy_XBdS0";
 
 
 var app = require('express')();
@@ -29,6 +29,10 @@ var wm_fish = new WeakMap();
 
 var haken = " <span style=\"color:#0f0;font-size:30px;\">&check;</span>";
 var kreuz = " <span style=\"color:#f00;font-size:30px;\">&cross;</span>";
+var afk_symbol = " <span style=\"color:#A28823;font-size:30px;\">&#9992;</span>";;
+
+var wm_afk = new WeakMap();
+var skipCount = 0;
 
 app.get('/', function(req, res){
 	res.sendFile(__dirname + '/index.html');
@@ -52,6 +56,7 @@ io.on('connection', function(socket){
 	socket.emit('setIPPORT', ip, portt);
 	socket.on('gameConnection', function(){
 		wm_points.set(socket, 0);
+		wm_afk.set(socket, false);
 		io.emit('chat message', "A new player has connected.");
 		refreshPlayerlist();
 		if(gameOver == 0) { //Spiel läuft
@@ -103,12 +108,14 @@ io.on('connection', function(socket){
 		gameOver = 0;
 		io.emit('deactNextB'); //deak nextButton
 		console.log("nextVideo");
+		skipCount = 0;
 		
 		//getStartingPlayerCount
 		startingConntectedPlayers = 0;
 		for (var i in io.sockets.connected) {
 			s = io.sockets.connected[i];
 			if(!(wm_points.has(s))) continue; //localhost überspringe
+			if(wm_afk.get(s)) continue; //afk-player nicht mitzählen
 			startingConntectedPlayers++;
 			wm_startingPlayer.set(s, 1); //vermerken wer mitspielt
 		}
@@ -207,6 +214,11 @@ io.on('connection', function(socket){
 		console.log("tipps: " + tipps);
 		refreshPlayerlist();
 		
+		if(wm_afk.get(s)) {
+			wm_startingPlayer.set(s,1);
+			startingConntectedPlayers++;
+			wm_afk.set(s,false);
+		}
 		if(startingConntectedPlayers == tipps) {
 			//Game over, show results
 			showResults();
@@ -240,6 +252,26 @@ io.on('connection', function(socket){
 		}
 		refreshPlayerlist();
 	});
+	
+	socket.on('skip', function() {
+		skipCount++;
+		io.emit('chat message', wm_names.get(socket) + " voted to skip (" + skipCount + "/" + startingConntectedPlayers + ").");
+		
+		if(skipCount > (startingConntectedPlayers/2)) {
+			//setze alle, die nicht gevoted haben auf den AFK status
+			for (var i in io.sockets.connected) {
+				s = io.sockets.connected[i];
+				if(!(wm_points.has(s))) continue; //überspringe Host
+				if(wm_startingPlayer.has(s)) {
+					if(!(wm.has(s))) {
+						wm_afk.set(s, true);
+					}
+				}
+			}
+			showResults();
+		}
+	});
+	
 });
 
 http.listen(port, function(){
@@ -312,7 +344,9 @@ function refreshPlayerlist() {
 		if(!(wm_points.has(s))) continue; //überspringe Host
 		var symbol = "";
 		if(wm_startingPlayer.has(s)) {
-			if(wm.has(s)) {
+			if(wm_afk.get(s)) {
+				symbol = afk_symbol;
+			} else if(wm.has(s)) {
 				symbol = haken;
 			} else {
 				symbol = kreuz;
