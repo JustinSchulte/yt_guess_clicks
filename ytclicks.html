@@ -185,6 +185,12 @@
 			$('#m').val('');
 			return false;
 		  }
+		  if(!ALLOWED_TO_PLAY) {
+		    $('#messages').append($('<li>').text("You are not allowed to play yet!").css('color', 'blue'));
+			$("#scrolldiv").scrollTop($("#scrolldiv")[0].scrollHeight);
+			$('#m').val('');
+			return false;
+		  }
 		  $('#fish').prop("disabled",true);
 		  $('#fish').css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/no_fishcard.png)");
 	      socket.emit('fish');

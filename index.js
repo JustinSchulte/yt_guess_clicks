@@ -1,10 +1,10 @@
 //IP AND PORT
-var ip = "";
-var portt = "";
+var ip = "teewurst24.party";
+var portt = "80";
 
 //API KEYS
-var apiKey_random = ""; //https://randomyoutube.net/api
-var apiKey_google = ""; //https://developers.google.com/youtube/v3/getting-started
+var apiKey_random = "764SPKrj5Bm0oJIMqrii8tCj5rAycyHjGvW0J7dcNvTAlV1B7kpMjsqRitIA";
+var apiKey_google = "AIzaSyAGgtcwTX7vyMrkLMBp7dmevMmIy_XBdS0";
 
 
 var app = require('express')();
@@ -210,15 +210,14 @@ io.on('connection', function(socket){
 				tipps++;
 			}
 		}
+		if(wm_afk.get(socket)) {
+			wm_startingPlayer.set(socket,1);
+			startingConntectedPlayers++;
+			wm_afk.set(socket,false);
+		}
 		console.log("startingConntectedPlayers: " + startingConntectedPlayers);
 		console.log("tipps: " + tipps);
 		refreshPlayerlist();
-		
-		if(wm_afk.get(s)) {
-			wm_startingPlayer.set(s,1);
-			startingConntectedPlayers++;
-			wm_afk.set(s,false);
-		}
 		if(startingConntectedPlayers == tipps) {
 			//Game over, show results
 			showResults();
