@@ -1,10 +1,10 @@
 //IP AND PORT
-var ip = "";
-var portt = "";
+var ip = "teewurst24.party";
+var portt = "3000";
 
 //API KEYS
-var apiKey_random = ""; //https://randomyoutube.net/api
-var apiKey_google = ""; //https://developers.google.com/youtube/v3/getting-started
+var apiKey_random = "764SPKrj5Bm0oJIMqrii8tCj5rAycyHjGvW0J7dcNvTAlV1B7kpMjsqRitIA";
+var apiKey_google = "AIzaSyAGgtcwTX7vyMrkLMBp7dmevMmIy_XBdS0";
 
 
 var app = require('express')();
@@ -53,7 +53,7 @@ app.use(favicon(__dirname + '/public/images/teewurst_icon.ico'));
 
 io.on('connection', function(socket){
 	//INIT IF CONNECTED
-	socket.emit('setIPPORT', ip, portt);
+	//socket.emit('setIPPORT', ip, portt); //NOT NECESSARY?!?!
 	socket.on('gameConnection', function(){
 		wm_points.set(socket, 0);
 		wm_afk.set(socket, false);

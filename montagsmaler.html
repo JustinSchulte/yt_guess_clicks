@@ -10,7 +10,12 @@
 	  }
 	  .backgroundMain {
 		background-size:cover;
+		background-image: url('/images/back3.jpg');
 		flex-grow: 1;
+	  }
+	  .backgroundTop {
+		background-size:cover;
+		background-image: url('/images/top3.jpg');
 	  }
 	  .button { 
 		font-size:24px;
@@ -29,7 +34,7 @@
   <body >
 		<div class="backgroundTop" style="font-size:24px; padding:5px">
 			<a href="/" style="text-decoration: none; margin-right: 20px;">
-				<img id="icon" src="" alt="Icon" style="width:32px;height:32px;">
+				<img id="icon" src="/images/teewurst_icon_white.ico" alt="Icon" style="width:32px;height:32px;">
 			</a>
 			<span style="color:white;font-size:24px">Montagsmaler</span>
 		</div>
@@ -67,22 +72,5 @@
 		</div>
     <script src="/scripts/socket.io-1.2.0.js"></script>
     <script src="/scripts/jquery-1.11.1.js"></script>
-    <script>
-      $(function () {
-		//VARIABLES
-		var ipAdresse = "";
-		var port = "";
-		var socket = io();
-        
-		socket.on('setIPPORT', function(s_ip, s_port){
-		  ipAdresse = s_ip;
-		  port = s_port;
-		  $(".backgroundMain").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/back3.jpg)");
-		  $(".backgroundTop").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/top3.jpg)");
-		  $("#fish").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/fishcard.png)");
-		  $("#icon").attr("src","http://" + ipAdresse + ":" + port + "/images/teewurst_icon_white.ico");
-		});
-      });
-    </script>
   </body>
 </html>

@@ -23,10 +23,12 @@
 			}
 			.backgroundTop {
 				background-size:cover;
+				background-image: url('/images/top3.jpg');
 			}
 			.backgroundMain {
 				background-size:cover;
 				flex-grow: 1;
+				background-image: url('/images/back3.jpg');
 			}
 		</style>
 	</head>
@@ -34,7 +36,7 @@
 	<body>
 		<div class="backgroundTop" style="font-size:24px; padding:10px;">
 			<a href="/" style="text-decoration: none;">
-				<img id="icon" src="" alt="Icon" style="width:64px;height:64px;">
+				<img id="icon" src="/images/teewurst_icon_white.ico" alt="Icon" style="width:64px;height:64px;">
 				<span style="color:white;font-size:48px" align="center">Teewurst24.party</span>
 			</a>
 		</div>
@@ -93,13 +95,6 @@
 						case 3:
 							break;
 					}
-				});
-				socket.on('setIPPORT', function(s_ip, s_port){
-					ipAdresse = s_ip;
-					port = s_port;
-					$(".backgroundMain").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/back3.jpg)");
-					$(".backgroundTop").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/top3.jpg)");
-					$("#icon").attr("src","http://" + ipAdresse + ":" + port + "/images/teewurst_icon_white.ico");
 				});
 			});
 		</script>

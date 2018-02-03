@@ -60,6 +60,7 @@
 	  }
 	  .backgroundTop {
 		background-size:cover;
+		background-image: url('/images/top3.jpg');
 	  }
 	  body, html {
 		height: 100%;
@@ -74,6 +75,7 @@
 		min-height:100%;
 		position:relative;
 		background-size:cover;
+		background-image: url('/images/back3.jpg');
 	  }
 	  th {
 		text-align: center;
@@ -96,11 +98,11 @@
 	<div id="contentWrapper">
 		<div class="backgroundTop" style="font-size:24px; padding:5px">
 			<a href="/" style="text-decoration: none; margin-right: 20px;">
-				<img id="icon" src="" alt="Icon" style="width:32px;height:32px;">
+				<img id="icon" src="/images/teewurst_icon_white.ico" alt="Icon" style="width:32px;height:32px;">
 			</a>
 			<span style="color:white;font-size:24px">Name:</span> <input style= "font-size:24px; width:10em; padding:5px; border-radius: 6px;" id="name" autocomplete="off" autofocus/>
 			<button class="button" id="change">change</button>
-			<button class="button" id="fish" style="margin-left: 100px; background-size:contain;color:transparent;background-repeat:no-repeat;background-position:center;">F</button>
+			<button class="button" id="fish" style="margin-left: 100px; background-image: url('/images/fishcard.png'); background-size:contain;color:transparent;background-repeat:no-repeat;background-position:center;">F</button>
 			<button class="button" id="next" style="margin-left: 100px;">nextVideo</button>
 			<div style="float: right;">
 			<input type="checkbox" style="font-size: 200%;" id="localHost" name="localHost" value="host">
@@ -192,7 +194,7 @@
 			return false;
 		  }
 		  $('#fish').prop("disabled",true);
-		  $('#fish').css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/no_fishcard.png)");
+		  $('#fish').css("background-image", "url('/images/no_fishcard.png')");
 	      socket.emit('fish');
 		});
 		//local Host
@@ -206,7 +208,7 @@
 				$('#next').prop("disabled",true);
 				$('#name').prop("disabled",true);
 				$('#change').prop("disabled",true);
-				$('#fish').css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/no_fishcard.png)");
+				$('#fish').css("background-image", "url('/images/no_fishcard.png')");
 				$('#footbox').css("display", "none");
 				frameX = 1600;
 				frameY = 900;
@@ -221,7 +223,7 @@
 				$('#next').prop("disabled",false);
 				$('#name').prop("disabled",false);
 				$('#change').prop("disabled",false);
-				$('#fish').css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/fishcard.png)");
+				$('#fish').css("background-image", "url('/images/no_fishcard.png')");
 				$('#footbox').css("display", "");
 				frameX = 1120;
 				frameY = 630;
@@ -326,14 +328,6 @@
 		  $('#messages').append($('<li>').text("The video has " + clicks + " clicks!").css({'color': 'red', 'font-weight': 'bold' }));
 		  $("#scrolldiv").scrollTop($("#scrolldiv")[0].scrollHeight);
 		  $("#clickView").html("Clicks: " + "<span style=\"color:#f00;font-size:30px;\">" + clicks + "</span>");
-		});
-		socket.on('setIPPORT', function(s_ip, s_port){
-		  ipAdresse = s_ip;
-		  port = s_port;
-		  $("#contentWrapper").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/back3.jpg)");
-		  $(".backgroundTop").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/top3.jpg)");
-		  $("#fish").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/fishcard.png)");
-		  $("#icon").attr("src","http://" + ipAdresse + ":" + port + "/images/teewurst_icon_white.ico");
 		});
       });
     </script>

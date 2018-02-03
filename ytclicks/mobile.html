@@ -61,11 +61,13 @@
 	  }
 	  .backgroundTop {
 		background-size:cover;
+		background-image: url('/images/top3.jpg');
 	  }
 	  #contentWrapper {
 		min-height:100%;
 		position:relative;
 		background-size:cover;
+		background-image: url('/images/back3.jpg');
 	  }
 	  th {
 		text-align: center;
@@ -92,7 +94,7 @@
 				<button class="button" id="change" style="float: right;">changeName</button>
 			</div>
 			<div style="font-size:24px; padding:10px;">
-				<button class="button" id="fish" style="background-size:contain;color:transparent;background-repeat:no-repeat;background-position:center;">F</button>
+				<button class="button" id="fish" style="background-image: url('/images/fishcard.png'); background-size:contain;color:transparent;background-repeat:no-repeat;background-position:center;">F</button>
 				<button class="button" id="next" style="float: right;">nextVideo</button>
 			</div>
 		</div>
@@ -164,7 +166,7 @@
 			return false;
 		  }
 		  $('#fish').prop("disabled",true);
-		  $('#fish').css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/no_fishcard.png)");
+		  $('#fish').css("background-image", "url('/images/no_fishcard.png')");
 	      socket.emit('fish');
 		});
         //Guess-Leiste Events
@@ -245,13 +247,6 @@
 		  $('#messages').append($('<li>').text("The video has " + clicks + " clicks!").css({'color': 'red', 'font-weight': 'bold' }));
 		  $("#scrolldiv").scrollTop($("#scrolldiv")[0].scrollHeight);
 		  $("#clickView").html("Clicks: " + "<span style=\"color:#f00;font-size:80px;\">" + clicks + "</span>");
-		});
-		socket.on('setIPPORT', function(s_ip, s_port){
-		  ipAdresse = s_ip;
-		  port = s_port;
-		  $("#contentWrapper").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/back3.jpg)");
-		  $(".backgroundTop").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/top3.jpg)");
-		  $("#fish").css("background-image", "url(http://" + ipAdresse + ":" + port + "/images/fishcard.png)");
 		});
       });
     </script>
