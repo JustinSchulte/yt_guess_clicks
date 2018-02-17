@@ -1,0 +1,125 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Memes</title>
+	<style>
+      * { margin: 0; padding: 0; box-sizing: border-box; font-size:16px;}
+      body {  font: 24px Helvetica, Arial; display:flex; flex-direction: column;}
+	  html, body{
+		height: 100%;
+	  }
+	  .backgroundMain {
+		background-size:cover;
+		background-image: url('/images/back3.jpg');
+		flex-grow: 1;
+	  }
+	  .backgroundTop {
+		background-size:cover;
+		background-image: url('/images/top3.jpg');
+	  }
+	  .button { 
+		font-size:24px;
+		padding:5px;
+		border-radius: 6px;
+		width:6em;
+		border: 2px solid #4CAF50;
+	  }
+	  .button:hover:enabled {
+		background-color: #4CAF50;
+		color: white;
+		cursor:pointer;
+	  }
+	  .right {
+		transform: rotate(-45deg);
+		-webkit-transform: rotate(-45deg);
+	  }	
+	  .left {
+		transform: rotate(135deg);
+		-webkit-transform: rotate(135deg);
+	  }
+	  i {
+		border: solid black;
+		border-width: 0 20px 20px 0;
+		display: inline-block;
+		padding: 20px;
+	  }
+	  i:hover {
+		border: solid blue;
+		cursor:pointer;
+		border-width: 0 20px 20px 0;
+		display: inline-block;
+		padding: 20px;
+	  }
+    </style>
+  </head>
+  <body >
+		<div class="backgroundTop" style="font-size:24px; padding:5px">
+			<a href="/" style="text-decoration: none; margin-right: 20px;">
+				<img id="icon" src="/images/teewurst_icon_white.ico" alt="Icon" style="width:32px;height:32px;">
+			</a>
+			<span style="color:white;font-size:24px">Memes</span>
+		</div>
+		<div class="backgroundMain" align="center">
+			<i id ="prev" class="left" style="vertical-align:top; margin-top:200px"></i>
+			<img align="center" id="iv" src="/memes/0.png" width="1000" style="padding:50px">
+			<i id ="next" class="right" style="vertical-align:top; margin-top:200px"></i>
+		</div>
+    <script src="/scripts/socket.io-1.2.0.js"></script>
+    <script src="/scripts/jquery-1.11.1.js"></script>
+	<script>
+		var socket = io();	
+		var files;
+		var pointer;
+		socket.emit('memes');
+		socket.on('memesCount', function(fileArray){
+			files = fileArray;
+			console.log(files);
+			pointer = files.length-1;
+			var help = "/memes/" + files[pointer];
+			console.log(help);
+			document.getElementById("iv").src=help;
+		});
+		
+		document.onkeydown = function(evt){
+			if (evt.keyCode === 37) {
+				console.log("prev");
+				prev()
+			}
+			else if(evt.keyCode === 39) {
+				console.log("next");
+				next();
+			}
+			else if(evt.keyCode === 13) {
+				console.log("enter");
+			}
+			else {
+				console.log("other");
+				console.log(evt.keyCode);
+			}
+		};
+		$("#next").click(function() {
+			next();
+		});
+		$("#prev").click(function() {
+			prev()
+		});
+		function next() {
+			pointer--;
+			if(pointer < 0) pointer = 0;
+			var help = "/memes/" + files[pointer];
+			console.log(help);
+			document.getElementById("iv").src=help;
+		}
+		function prev() {
+			pointer++;
+			if(pointer > (files.length-1)) pointer = files.length-1;
+			var help = "/memes/" + files[pointer];
+			console.log(help);
+			document.getElementById("iv").src=help;
+		}
+		
+		
+		
+    </script>
+  </body>
+</html>

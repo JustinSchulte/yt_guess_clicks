@@ -46,6 +46,8 @@
 			<button class="button" id="yt_m">YT-Clicks Mobile</button>
 			<br>
 			<button class="button" id="mo">Montagsmaler</button>
+			<br>
+			<button class="button" id="memes">Memes</button>
 		</div>
 		
 		
@@ -91,6 +93,18 @@
 							break;
 						case 2:
 							window.open("/montagsmaler");
+							break;
+						case 3:
+							break;
+					}
+				});
+				$("#memes").on('click auxclick contextmenu', function(e) {
+					switch(e.which) {
+						case 1:
+							window.location = "/memes";
+							break;
+						case 2:
+							window.open("/memes");
 							break;
 						case 3:
 							break;

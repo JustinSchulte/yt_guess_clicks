@@ -46,12 +46,28 @@ app.get('/ytclicks/mobile',function(req,res){
 app.get('/montagsmaler', function(req, res){
 	res.sendFile(__dirname + '/montagsmaler.html');
 });
+app.get('/memes', function(req, res){
+	res.sendFile(__dirname + '/memes.html');
+});
 
 app.use(express.static(path.join(__dirname, 'public')));
 var favicon = require('serve-favicon');
 app.use(favicon(__dirname + '/public/images/teewurst_icon.ico'));
 
 io.on('connection', function(socket){
+	//memes
+	socket.on('memes', function(){
+		const fs = require('fs');
+		const dir = __dirname + '/public/memes';
+		var count = 0;
+
+		fs.readdir(dir, (err, files) => {
+			count = files.length;
+			console.log(files);
+			socket.emit('memesCount', files);
+		});
+	});
+	
 	//INIT IF CONNECTED
 	//socket.emit('setIPPORT', ip, portt); //NOT NECESSARY?!?!
 	socket.on('gameConnection', function(){
