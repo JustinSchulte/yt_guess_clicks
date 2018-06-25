@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+  <head>
+    <title>WM Tippspiel</title>
+	<style>
+      * { margin: 0; padding: 0; box-sizing: border-box; font-size:16px;}
+      body {  font: 24px Helvetica, Arial; display:flex; flex-direction: column;}
+	  html, body{
+		height: 100%;
+	  }
+	  .backgroundMain {
+		background-size:cover;
+		background-image: url('/images/back3.jpg');
+		flex-grow: 1;
+	  }
+	  .backgroundTop {
+		background-size:cover;
+		background-image: url('/images/top3.jpg');
+	  }
+	  .button { 
+		font-size:24px;
+		padding:5px;
+		border-radius: 6px;
+		width:6em;
+		border: 2px solid #4CAF50;
+	  }
+	  .button:hover:enabled {
+		background-color: #4CAF50;
+		color: white;
+		cursor:pointer;
+	  }
+    </style>
+	<script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
+</head>
+  <body >
+		<div class="backgroundTop" style="font-size:24px; padding:5px">
+			<a href="/" style="text-decoration: none; margin-right: 20px;">
+				<img id="icon" src="/images/teewurst_icon_white.ico" alt="Icon" style="width:32px;height:32px;">
+			</a>
+			<span style="color:white;font-size:24px">Montagsmaler</span>
+		</div>
+		<div class="backgroundMain">
+			<br>
+			Deutschland <input type="number" id="first" style="width:40px;">:<input type="number" name="second" style="width:40px;">Schweden
+			<br>
+			<button type="button" action="/" method="save">Save</button>
+		</div>
+    <script src="/scripts/socket.io-1.2.0.js"></script>
+    <script src="/scripts/jquery-1.11.1.js"></script>
+	<script> 
+		const getCookie = (name) => {
+		  const value = "; " + document.cookie;
+		  const parts = value.split("; " + name + "=");
+		  if (parts.length === 2) return parts.pop().split(";").shift();
+		};
+
+		const deleteCookie = (name) => {
+		  document.cookie = name + '=; max-age=0;';
+		};
+
+		const parseObjectFromCookie = (cookie) => {
+		  const decodedCookie = decodeURIComponent(cookie);
+		  return JSON.parse(decodedCookie);
+		};
+
+		window.onload = () => {
+		  let dataCookie = getCookie('data');
+		  deleteCookie('data');
+
+		  if (dataCookie) {
+			const data = parseObjectFromCookie(dataCookie);
+			console.log(data);
+			// work with data. `data` is equal to `visitCard` from the server
+
+		  } else {
+			// handle data not found
+		  }
+		}
+	</script>
+  </body>
+</html>

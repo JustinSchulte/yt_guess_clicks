@@ -1,5 +1,5 @@
 //IP AND PORT
-var ip = "teewurst24.party";
+var ip = "localhost";
 var portt = "3000";
 
 //API KEYS
@@ -14,6 +14,13 @@ var port = process.env.PORT || portt;
 
 var express = require('express');
 var path = require('path');
+
+//NEW AUTH
+var bodyParser = require('body-parser');
+var mongoose = require('mongoose');
+var session = require('express-session');
+var MongoStore = require('connect-mongo')(session);
+
 
 var wm = new WeakMap();
 var wm_names = new WeakMap();
@@ -49,10 +56,45 @@ app.get('/montagsmaler', function(req, res){
 app.get('/memes', function(req, res){
 	res.sendFile(__dirname + '/memes.html');
 });
+app.get('/memes', function(req, res){
+	res.sendFile(__dirname + '/memes.html');
+});
+app.get('/wm', function(req, res){
+	res.sendFile(__dirname + '/wm.html');
+});
 
 app.use(express.static(path.join(__dirname, 'public')));
 var favicon = require('serve-favicon');
 app.use(favicon(__dirname + '/public/images/teewurst_icon.ico'));
+
+//NEW
+//connect to MongoDB
+mongoose.connect('mongodb://localhost/testForAuth');
+var db = mongoose.connection;
+//handle mongo error
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function () {
+	console.log("connected");
+  // we're connected!
+});
+//use sessions for tracking logins
+app.use(session({
+  secret: 'work hard',
+  resave: true,
+  saveUninitialized: false,
+  store: new MongoStore({
+    mongooseConnection: db
+  })
+}));
+// parse incoming requests
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+// include routes
+var routes = require('./public/routes/router');
+app.use('/', routes);
+
+//AT START
+getFrequentSoccerStats(); //GET Soccer wm games
 
 io.on('connection', function(socket){
 	//memes
@@ -387,4 +429,12 @@ function notAvailableVideo() {
 	io.emit('chat message', "MULTIPLIER!");
 	io.emit('actNextB'); //ak nextButton
 	return;
+}
+
+function getFrequentSoccerStats() {
+	setInterval(wm_games, 1000*60);
+}
+
+function wm_games() {
+	console.log("New message...");
 }

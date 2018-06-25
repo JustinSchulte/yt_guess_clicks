@@ -48,6 +48,8 @@
 			<button class="button" id="mo">Montagsmaler</button>
 			<br>
 			<button class="button" id="memes">Memes</button>
+			<br>
+			<button class="button" id="wm">WM-Tippspiel</button>
 		</div>
 		
 		
@@ -105,6 +107,18 @@
 							break;
 						case 2:
 							window.open("/memes");
+							break;
+						case 3:
+							break;
+					}
+				});
+				$("#wm").on('click auxclick contextmenu', function(e) {
+					switch(e.which) {
+						case 1:
+							window.location = "/wm";
+							break;
+						case 2:
+							window.open("/wm");
 							break;
 						case 3:
 							break;
