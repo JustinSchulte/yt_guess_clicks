@@ -1,6 +1,6 @@
 //IP AND PORT
 var ip = "localhost";
-var portt = "3000";
+var portt = "80";
 
 //API KEYS
 var apiKey_random = "764SPKrj5Bm0oJIMqrii8tCj5rAycyHjGvW0J7dcNvTAlV1B7kpMjsqRitIA";
@@ -8,8 +8,9 @@ var apiKey_google = "AIzaSyAGgtcwTX7vyMrkLMBp7dmevMmIy_XBdS0";
 
 
 var app = require('express')();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
+var http = require('http');
+var http_server = http.Server(app);
+var io = require('socket.io')(http_server);
 var port = process.env.PORT || portt;
 
 var express = require('express');
@@ -20,6 +21,17 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var session = require('express-session');
 var MongoStore = require('connect-mongo')(session);
+var User = require('./public/models/user');
+
+//GAME-SCHEMA
+var gameSchema = mongoose.Schema({
+  id: String,
+  state: String,
+  quoteHome: Number,
+  quoteAway: Number,
+  quoteDraw: Number
+});
+var game = mongoose.model('game', gameSchema);
 
 
 var wm = new WeakMap();
@@ -69,7 +81,7 @@ app.use(favicon(__dirname + '/public/images/teewurst_icon.ico'));
 
 //NEW
 //connect to MongoDB
-mongoose.connect('mongodb://localhost/testForAuth');
+mongoose.connect('mongodb://localhost/wmGame');
 var db = mongoose.connection;
 //handle mongo error
 db.on('error', console.error.bind(console, 'connection error:'));
@@ -92,6 +104,15 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // include routes
 var routes = require('./public/routes/router');
 app.use('/', routes);
+
+app.get('/clicks', (req, res) => {
+  db.collection('games').find().toArray((err, result) => {
+    if (err) return console.log(err);
+    res.send(result);
+  });
+});
+
+
 
 //AT START
 getFrequentSoccerStats(); //GET Soccer wm games
@@ -331,7 +352,7 @@ io.on('connection', function(socket){
 	
 });
 
-http.listen(port, function(){
+http_server.listen(port, function(){
   console.log('listening on *:' + port);
 });
 
@@ -432,9 +453,102 @@ function notAvailableVideo() {
 }
 
 function getFrequentSoccerStats() {
-	setInterval(wm_games, 1000*60);
+	setTimeout(wm_games, 1000*5);
+	setInterval(wm_games, 1000*120);
 }
 
 function wm_games() {
-	console.log("New message...");
+	var wikiData;
+
+    var options = {
+        hostname: 'api.football-data.org',
+        path: '/v2/competitions/2000/matches',
+		headers: { 'X-Auth-Token': '07042891263a4116b3c3911ed00165f8' }
+    };
+
+    var req = http.request(options, function(res) {
+
+        if (!res) { 
+            wikiData = "An error occured!";
+        };
+
+        var body = '';
+        console.log("statusCode: ", res.statusCode);
+        res.setEncoding('utf8');
+
+        res.on('data', function(data) {
+            body += data;
+        });
+
+        res.on('end', function() {
+            wikiData = JSON.parse(body);
+			var matches = wikiData.matches;
+			db.collection('games').find().toArray((err, games) => {
+				if (err) return console.log(err);
+				db.collection('users').find().toArray((err, users) => {
+					if (err) return console.log(err);
+					for(var i=0; i<matches.length; i++) {
+						var status = matches[i].status;
+						if(status == "FINISHED") {
+							var gameID = matches[i].homeTeam.name + "_" + matches[i].awayTeam.name;
+							for(var j=0; j<games.length; j++) {
+								if(games[j].id == gameID) {
+									if(games[j].state == "SCHEDULED") {
+										//scheduled changed to finished -> refresh and update points
+										//update games db
+										game.findOne({id: games[j].id}, function (err, match) {
+											match.state = "FINISHED";
+											match.save(function (err) {
+												if(err) {
+													console.error('ERROR!');
+												}
+											});
+										});
+										
+										//iterate users
+										for(var k=0; k<users.length; k++) {
+											if(users[k].tipps[gameID] != undefined) {
+												console.log("uh yeah theres a vote");
+												var reward = users[k].tipps[gameID].value;
+												var vote = users[k].tipps[gameID].choice;
+												var quote = 0;
+												if(vote == 0 && matches[i].score.winner == "HOME_TEAM") {
+													quote = games[j].quoteHome;
+												} else if(vote == 1 && matches[i].score.winner == "DRAW") {
+													quote = games[j].quoteDraw;
+												} else if(vote == 2 && matches[i].score.winner == "AWAY_TEAM") {
+													quote = games[j].quoteAway;
+												}
+												reward = reward * quote;
+												reward = Math.ceil(reward)
+												
+												//update users db
+												User.findOne({username: users[k].username}, function (err, user) {
+													user.points = parseInt(user.points) + reward,
+													user.password = user.passwordConf,
+													
+													user.save(function (err) {
+														if(err) {
+															console.error('ERROR!');
+														}
+													});
+												});
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				});
+			});
+        });
+    });
+
+    req.end();
+    req.on('error', function (err) {
+        wikiData = "API down?!?!";
+    })
+
+	
 }

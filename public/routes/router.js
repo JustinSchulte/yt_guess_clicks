@@ -26,6 +26,8 @@ router.post('/', function (req, res, next) {
       username: req.body.username,
       password: req.body.password,
       passwordConf: req.body.passwordConf,
+	  points: 10000,
+	  tipps: new Map(),
     }
 
     User.create(userData, function (error, user) {
@@ -33,7 +35,7 @@ router.post('/', function (req, res, next) {
         return next(error);
       } else {
         req.session.userId = user._id;
-        return res.redirect('/profile');
+        return res.redirect('/tipp');
       }
     });
 
@@ -88,5 +90,32 @@ router.get('/logout', function (req, res, next) {
     });
   }
 });
+
+router.post('/clicked', (req, res) => {
+	var oldUsername = req.body.myID;
+	var value = req.body.chips;
+	var choice = req.body.checkedValue;
+	var gameID = req.body.gameID;
+	var diffToOld = req.body.diffToOld;
+	var tipps = new Map();
+	
+	console.log(oldUsername + ", " + value + ", " + choice + ", " + gameID);
+	User.findOne({username: oldUsername}, function (err, user) {
+		user.points = (parseInt(user.points) - parseInt(diffToOld)),
+		user.password = user.passwordConf,
+		tipps = user.tipps,
+		tipps.set(gameID, {"value": +value, "choice": +choice}),
+		console.log(tipps);
+		
+
+		user.save(function (err) {
+			console.log(user.password);
+			if(err) {
+				console.error('ERROR!');
+			}
+		});
+	});
+});
+
 
 module.exports = router;

@@ -16,7 +16,14 @@ var UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  tipps: Map
+  points: {
+	type: Number,
+	required: true,
+  },
+  tipps: {
+	type: Map,
+	required: true,
+  }
 });
 
 //authenticate input against database

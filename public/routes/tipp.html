@@ -17,17 +17,32 @@
 		background-size:cover;
 		background-image: url('/images/top3.jpg');
 	  }
-	  .button { 
+	  .btn-group input[type="radio"] {
+		display: none;
+	  }
+	  .btn-group label { 
+		background: #D3D3D3;
 		font-size:24px;
 		padding:5px;
 		border-radius: 6px;
-		width:6em;
+		width: 200px;
+		display: inline-block;
 		border: 2px solid #4CAF50;
 	  }
-	  .button:hover:enabled {
-		background-color: #4CAF50;
+	  .btn-group input[type="number"] {
+		font-size:24px;
+		padding:5px;
+		border-radius: 6px;
+		border: 2px solid #4CAF50;
+		width: 100px;
+	  }
+	  .btn-group input[type="radio"]:checked+label{
 		color: white;
-		cursor:pointer;
+		background-color: #4CAF50;
+	  }
+	  
+	  form {
+		padding:10px;
 	  }
     </style>
 	<script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
@@ -37,17 +52,155 @@
 			<a href="/" style="text-decoration: none; margin-right: 20px;">
 				<img id="icon" src="/images/teewurst_icon_white.ico" alt="Icon" style="width:32px;height:32px;">
 			</a>
-			<span style="color:white;font-size:24px">Montagsmaler</span>
+			<span style="color:white;font-size:24px">Tippspiel</span>
+			<label style="color:white;font-size:20px;margin-left: 100px;" id="pointView">Chips:</label>
 		</div>
 		<div class="backgroundMain">
 			<br>
-			Deutschland <input type="number" id="first" style="width:40px;">:<input type="number" name="second" style="width:40px;">Schweden
-			<br>
-			<button type="button" action="/" method="save">Save</button>
+				<div class="tipp-form">
+					<form id="France_Argentina">
+						<div class="btn-group">
+						  <input type="radio" id="radio1" name="radios" value="0">
+						  <label for="radio1">France<br><font size="6">2,3</font></label>
+
+						  <input type="radio" id="radio2" name="radios" value="1">
+						  <label for="radio2">~<br><font size="6">1,3</font></label>
+
+						  <input type="radio" id="radio3" name="radios" value="2">
+						  <label for="radio3">Argentina<br><font size="6">1,3</font></label>
+						  
+						  <input type="number" name="pointInput" placeholder="0">
+						  <input type="submit" value="SAVE">
+						</div>	
+					</form>
+				</div>
+				<div class="tipp-form">
+					<form id="Spain_Russia">
+						<div class="btn-group">
+						  <input type="radio" id="radio21" name="radios" value="0">
+						  <label for="radio21">Spain<br><font size="6">1,55</font></label>
+
+						  <input type="radio" id="radio22" name="radios" value="1">
+						  <label for="radio22">~<br><font size="6">4,1</font></label>
+
+						  <input type="radio" id="radio23" name="radios" value="2">
+						  <label for="radio23">Russia<br><font size="6">6,3</font></label>
+						  
+						  <input type="number" name="pointInput" placeholder="0">
+						  <input type="submit" value="SAVE">
+						</div>	
+					</form>
+				</div>
+				<div class="tipp-form">
+					<form id="Croatia_Denmark">
+						<div class="btn-group">
+						  <input type="radio" id="radio21" name="radios" value="0">
+						  <label for="radio21">Croatia<br><font size="6">1,9</font></label>
+
+						  <input type="radio" id="radio22" name="radios" value="1">
+						  <label for="radio22">~<br><font size="6">3,2</font></label>
+
+						  <input type="radio" id="radio23" name="radios" value="2">
+						  <label for="radio23">Denmark<br><font size="6">4,7</font></label>
+						  
+						  <input type="number" name="pointInput" placeholder="0">
+						  <input type="submit" value="SAVE">
+						</div>	
+					</form>
+				</div>
+				<div class="tipp-form">
+					<form id="Brazil_Mexico">
+						<div class="btn-group">
+						  <input type="radio" id="radio21" name="radios" value="0">
+						  <label for="radio21">Brazil<br><font size="6">1,45</font></label>
+
+						  <input type="radio" id="radio22" name="radios" value="1">
+						  <label for="radio22">~<br><font size="6">4,3</font></label>
+
+						  <input type="radio" id="radio23" name="radios" value="2">
+						  <label for="radio23">Mexico<br><font size="6">8,0</font></label>
+						  
+						  <input type="number" name="pointInput" placeholder="0">
+						  <input type="submit" value="SAVE">
+						</div>	
+					</form>
+				</div>
+				<div class="tipp-form">
+					<form id="Belgium_Japan">
+						<div class="btn-group">
+						  <input type="radio" id="radio21" name="radios" value="0">
+						  <label for="radio21">Belgium<br><font size="6">1,37</font></label>
+
+						  <input type="radio" id="radio22" name="radios" value="1">
+						  <label for="radio22">~<br><font size="6">4,6</font></label>
+
+						  <input type="radio" id="radio23" name="radios" value="2">
+						  <label for="radio23">Japan<br><font size="6">10,0</font></label>
+						  
+						  <input type="number" name="pointInput" placeholder="0">
+						  <input type="submit" value="SAVE">
+						</div>	
+					</form>
+				</div>
+				<div class="tipp-form">
+					<form id="Sweden_Switzerland">
+						<div class="btn-group">
+						  <input type="radio" id="radio21" name="radios" value="0">
+						  <label for="radio21">Sweden<br><font size="6">3,0</font></label>
+
+						  <input type="radio" id="radio22" name="radios" value="1">
+						  <label for="radio22">~<br><font size="6">2,9</font></label>
+
+						  <input type="radio" id="radio23" name="radios" value="2">
+						  <label for="radio23">Switzerland<br><font size="6">2,7</font></label>
+						  
+						  <input type="number" name="pointInput" placeholder="0">
+						  <input type="submit" value="SAVE">
+						</div>	
+					</form>
+				</div>
+				<div class="tipp-form">
+					<form id="Colombia_England">
+						<div class="btn-group">
+						  <input type="radio" id="radio21" name="radios" value="0">
+						  <label for="radio21">Colombia<br><font size="6">4,0</font></label>
+
+						  <input type="radio" id="radio22" name="radios" value="1">
+						  <label for="radio22">~<br><font size="6">3,2</font></label>
+
+						  <input type="radio" id="radio23" name="radios" value="2">
+						  <label for="radio23">England<br><font size="6">2,05</font></label>
+						  
+						  <input type="number" name="pointInput" placeholder="0">
+						  <input type="submit" value="SAVE">
+						</div>	
+					</form>
+				</div>
+				<div class="tipp-form">
+					<form id="Uruguay_France">
+						<div class="btn-group">
+						  <input type="radio" id="radio21" name="radios" value="0">
+						  <label for="radio21">Uruguay<br><font size="6">4,4</font></label>
+
+						  <input type="radio" id="radio22" name="radios" value="1">
+						  <label for="radio22">~<br><font size="6">3,2</font></label>
+
+						  <input type="radio" id="radio23" name="radios" value="2">
+						  <label for="radio23">France<br><font size="6">1,95</font></label>
+						  
+						  <input type="number" name="pointInput" placeholder="0">
+						  <input type="submit" value="SAVE">
+						</div>	
+					</form>
+				</div>
 		</div>
     <script src="/scripts/socket.io-1.2.0.js"></script>
     <script src="/scripts/jquery-1.11.1.js"></script>
 	<script> 
+		var myID = "";
+		var myChips = 0;
+		var map;
+	
 		const getCookie = (name) => {
 		  const value = "; " + document.cookie;
 		  const parts = value.split("; " + name + "=");
@@ -69,13 +222,87 @@
 
 		  if (dataCookie) {
 			const data = parseObjectFromCookie(dataCookie);
-			console.log(data);
-			// work with data. `data` is equal to `visitCard` from the server
+			//data is all data from logged in user
+			//console.log(data);
+			myID = data["username"];
+			myChips = data["points"];
+			$('#pointView').text("Chips: " + myChips);
+			map = data["tipps"];
+			for (var key in map) {
+				var value = map[key];
+				console.log(key + ": " + value.value + ", " + value.choice);
+				$('#'+key).find('input[name="pointInput"]').val(value.value);
+				$('#'+key).find('input[name=radios][value='+value.choice+']').prop("checked", true);
+			}
 
+			
 		  } else {
 			// handle data not found
 		  }
 		}
+		
+		getMatches();
+		setInterval(getMatches, 30000);
+		
+		function getMatches() {
+			fetch('/clicks', {method: 'GET'})
+			.then(function(response) {
+			  if(response.ok) return response.json();
+			  throw new Error('Request failed.');
+			})
+			.then(function(data) {
+				//check games if already playing or ...
+				for(var i=0; i<data.length; i++) {
+					if(data[i].state != "SCHEDULED") {
+						$('#' + data[i].id).find('input[name="pointInput"]').prop("disabled",true);
+						$('#' + data[i].id).find('input[type="submit"]').prop("disabled",true);
+						$('#' + data[i].id).find('input[name=radios]').prop("disabled",true);
+					}
+				}
+			})
+			.catch(function(error) {
+			  console.log(error);
+			});
+		}
+		
+		$(function() {
+			$('form').submit(function() {
+				var gameID = $(this).closest("form[id]").attr('id');
+				console.log("form id: " + gameID);
+
+				var chips = $('#'+gameID).find('input[name="pointInput"]').val();
+				var checkedValue = $('#'+gameID).find('input[name=radios]:checked').val();
+				if(checkedValue == undefined) {
+					//stop if no team selected
+					alert("You have to select a team!");
+					return false;
+				}
+				if(map[gameID] != undefined) {
+					var old = map[gameID].value;
+					var diffToOld = chips-old;
+					map[gameID].value = chips;
+					myChips = myChips - diffToOld;
+				} else {
+					var diffToOld = chips;
+					myChips = myChips - diffToOld;
+				}
+				
+				$('#pointView').text("Chips: " + myChips);
+								
+				if(chips > myChips) {
+					//stop if not enough chips
+					alert("You dont have that much chips!");
+					return false;
+				}
+				
+				$.ajax({
+					type: 'POST',
+					url: '/clicked',
+					data: {myID, chips, checkedValue, gameID, diffToOld}
+				});
+				return false;
+			}); 
+		})
 	</script>
   </body>
 </html>
