@@ -1,6 +1,6 @@
 //IP AND PORT
 var ip = "teewurst24.party";
-var portt = "80";
+var portt = "3000";
 
 //API KEYS
 var apiKey_random = "764SPKrj5Bm0oJIMqrii8tCj5rAycyHjGvW0J7dcNvTAlV1B7kpMjsqRitIA";
