@@ -493,7 +493,7 @@ function wm_games() {
 							var gameID = matches[i].homeTeam.name + "_" + matches[i].awayTeam.name;
 							for(var j=0; j<games.length; j++) {
 								if(games[j].id == gameID) {
-									if(games[j].state == "SCHEDULED") {
+									if(games[j].state == "SCHEDULED" || games[j].state == "IN_PLAY") {
 										//scheduled changed to finished -> refresh and update points
 										//update games db
 										game.findOne({id: games[j].id}, function (err, match) {
@@ -535,6 +535,23 @@ function wm_games() {
 												});
 											}
 										}
+									}
+								}
+							}
+						} else if(status == "IN_PLAY") {
+							var gameID = matches[i].homeTeam.name + "_" + matches[i].awayTeam.name;
+							for(var j=0; j<games.length; j++) {
+								if(games[j].id == gameID) {
+									if(games[j].state == "SCHEDULED") {
+										//scheduled changed to IN_PLAY -> refresh db games
+										game.findOne({id: games[j].id}, function (err, match) {
+											match.state = "IN_PLAY";
+											match.save(function (err) {
+												if(err) {
+													console.error('ERROR!');
+												}
+											});
+										});
 									}
 								}
 							}
