@@ -1,5 +1,5 @@
 //IP AND PORT
-var ip = "localhost";
+var ip = "teewurst24.party";
 var portt = "80";
 
 //API KEYS
