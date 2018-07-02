@@ -271,8 +271,11 @@
 					myChips = myChips - diffToOld;
 				}
 				//disable buttons for 5seconds
-				for (var key in map) {
-					$('#'+key).find('input[type="submit"]').prop("disabled",true);
+				var inputs = document.getElementsByTagName('input');
+				for (var i = 0; i < inputs.length; i++) {
+					if (inputs[i].type === 'submit') {
+						inputs[i].disabled = true;
+					}
 				}
 				
 				$('#pointView').text("Chips: " + myChips);
@@ -290,8 +293,11 @@
 				});
 				setTimeout(function(){
 					//enable buttons after 5seconds
-					for (var key in map) {
-						$('#'+key).find('input[type="submit"]').prop("disabled",false);
+					var inputs = document.getElementsByTagName('input');
+					for (var i = 0; i < inputs.length; i++) {
+						if (inputs[i].type === 'submit') {
+							inputs[i].disabled = false;
+						}
 					}
 				},5000);
 				return false;
