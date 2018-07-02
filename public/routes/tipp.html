@@ -261,6 +261,16 @@
 					alert("You have to select a team!");
 					return false;
 				}
+				if(chips == undefined) {
+					//stop if no chips bet
+					alert("You have to select a team!");
+					return false;
+				}
+				if(chips > myChips) {
+					//stop if not enough chips
+					alert("You dont have that much chips!");
+					return false;
+				}
 				if(map[gameID] != undefined) {
 					var old = map[gameID].value;
 					var diffToOld = chips-old;
@@ -269,6 +279,7 @@
 				} else {
 					var diffToOld = chips;
 					myChips = myChips - diffToOld;
+					map[gameID] = {"value": +chips, "choice": +checkedValue};
 				}
 				//disable buttons for 5seconds
 				var inputs = document.getElementsByTagName('input');
@@ -280,11 +291,7 @@
 				
 				$('#pointView').text("Chips: " + myChips);
 								
-				if(chips > myChips) {
-					//stop if not enough chips
-					alert("You dont have that much chips!");
-					return false;
-				}
+				
 				
 				$.ajax({
 					type: 'POST',
