@@ -483,7 +483,13 @@ function wm_games() {
 
         res.on('end', function() {
             wikiData = JSON.parse(body);
+			if(wikiData == undefined) {
+				return console.log("wikiData is undefined");
+			}
 			var matches = wikiData.matches;
+			if(matches == undefined) {
+				return console.log("matches is undefined");
+			}
 		
 			db.collection('games').find().toArray((err, games) => {
 				if (err) return console.log(err);
