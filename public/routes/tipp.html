@@ -235,6 +235,7 @@
 			})
 			.then(function(data) {
 				//check games if already playing or ...
+				//console.log(data);
 				for(var i=0; i<data.length; i++) {
 					if(data[i].state != "SCHEDULED") {
 						$('#' + data[i].id).find('input[name="pointInput"]').prop("disabled",true);
@@ -269,6 +270,10 @@
 					var diffToOld = chips;
 					myChips = myChips - diffToOld;
 				}
+				//disable buttons for 5seconds
+				for (var key in map) {
+					$('#'+key).find('input[type="submit"]').prop("disabled",true);
+				}
 				
 				$('#pointView').text("Chips: " + myChips);
 								
@@ -283,6 +288,12 @@
 					url: '/clicked',
 					data: {myID, chips, checkedValue, gameID, diffToOld}
 				});
+				setTimeout(function(){
+					//enable buttons after 5seconds
+					for (var key in map) {
+						$('#'+key).find('input[type="submit"]').prop("disabled",false);
+					}
+				},5000);
 				return false;
 			}); 
 		})
