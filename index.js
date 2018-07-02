@@ -1,5 +1,5 @@
 //IP AND PORT
-var ip = "teewurst24.party";
+var ip = "localhost";
 var portt = "3000";
 
 //API KEYS
@@ -81,7 +81,8 @@ app.use(favicon(__dirname + '/public/images/teewurst_icon.ico'));
 
 //NEW
 //connect to MongoDB
-mongoose.connect('mongodb://localhost/wmGame');
+var uri = 'mongodb://schokokroko:toastbrot5@cluster0-shard-00-00-cibks.mongodb.net:27017,cluster0-shard-00-01-cibks.mongodb.net:27017,cluster0-shard-00-02-cibks.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true';
+mongoose.connect(uri + "/wm_game");
 var db = mongoose.connection;
 //handle mongo error
 db.on('error', console.error.bind(console, 'connection error:'));
