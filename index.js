@@ -106,11 +106,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 var routes = require('./public/routes/router');
 app.use('/', routes);
 
+var gameArray; //get refreshed through every 2min API call
 app.get('/clicks', (req, res) => {
-  db.collection('games').find().toArray((err, result) => {
-    if (err) return console.log(err);
-    res.send(result);
-  });
+  return gameArray;
 });
 
 
@@ -493,6 +491,7 @@ function wm_games() {
 		
 			db.collection('games').find().toArray((err, games) => {
 				if (err) return console.log(err);
+				gameArray = games;
 				db.collection('users').find().toArray((err, users) => {
 					if (err) return console.log(err);
 					for(var i=0; i<matches.length; i++) {
