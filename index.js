@@ -108,7 +108,11 @@ app.use('/', routes);
 
 var gameArray; //get refreshed through every 2min API call
 app.get('/clicks', (req, res) => {
-  return gameArray;
+	console.log("games: " + gameArray + "; users: " + userArray);
+	result = {"games":gameArray, "users":userArray};
+	console.log(result);
+	console.log(gameArray);
+	return result;
 });
 
 
@@ -480,7 +484,12 @@ function wm_games() {
         });
 
         res.on('end', function() {
-            wikiData = JSON.parse(body);
+			try {
+				wikiData = JSON.parse(body);
+			} catch(err) {
+				return console.log("PARSING ERROR: \n" + err);
+			}
+            
 			if(wikiData == undefined) {
 				return console.log("wikiData is undefined");
 			}
@@ -494,8 +503,15 @@ function wm_games() {
 				gameArray = games;
 				db.collection('users').find().toArray((err, users) => {
 					if (err) return console.log(err);
+					//create userArray without passwords
+					userArray = new Array();
+					for(var i=0; i<users.length; i++) {
+						var person = {username:users[i].username, points:users[i].points, tipps:users[i].tipps};
+						userArray.push(person);
+					}
+					
+					
 					for(var i=0; i<matches.length; i++) {
-						console.log(matches[i].score); //TODO
 						var status = matches[i].status;
 						if(status == "FINISHED") {
 							var gameID = matches[i].homeTeam.name + "_" + matches[i].awayTeam.name;
