@@ -12,6 +12,16 @@
 		background-size:cover;
 		background-image: url('/images/back3.jpg');
 		flex-grow: 1;
+		display: flex;
+		flex-wrap: nowrap;
+	  }
+	  #votes {
+		width:70%;
+		border-style: solid;
+	  }
+	  #points {
+		width:30%;
+		border-style: solid;
 	  }
 	  .backgroundTop {
 		background-size:cover;
@@ -57,6 +67,7 @@
 		</div>
 		<div class="backgroundMain">
 			<br>
+			<div id="votes">
 				<div class="tipp-form">
 					<form id="Spain_Russia">
 						<div class="btn-group">
@@ -176,6 +187,9 @@
 						</div>	
 					</form>
 				</div>
+			</div>
+			<div id="points">
+			</div>
 		</div>
     <script src="/scripts/socket.io-1.2.0.js"></script>
     <script src="/scripts/jquery-1.11.1.js"></script>
@@ -183,6 +197,8 @@
 		var myID = "";
 		var myChips = 0;
 		var map;
+		var matches;
+		var users;
 	
 		const getCookie = (name) => {
 		  const value = "; " + document.cookie;
@@ -228,21 +244,38 @@
 		setInterval(getMatches, 120000);
 		
 		function getMatches() {
+			console.log("before fetch");
 			fetch('/clicks', {method: 'GET'})
 			.then(function(response) {
+			  console.log("response");
 			  if(response.ok) return response.json();
 			  throw new Error('Request failed.');
 			})
 			.then(function(data) {
 				//check games if already playing or ...
-				//console.log(data);
-				for(var i=0; i<data.length; i++) {
-					if(data[i].state != "SCHEDULED") {
-						$('#' + data[i].id).find('input[name="pointInput"]').prop("disabled",true);
-						$('#' + data[i].id).find('input[type="submit"]').prop("disabled",true);
-						$('#' + data[i].id).find('input[name=radios]').prop("disabled",true);
+				console.log(data);
+				matches = data.games;
+				users = data.users;
+				
+				for(var i=0; i<matches.length; i++) {
+					if(matches[i].state != "SCHEDULED") {
+						$('#' + matches[i].id).find('input[name="pointInput"]').prop("disabled",true);
+						$('#' + matches[i].id).find('input[type="submit"]').prop("disabled",true);
+						$('#' + matches[i].id).find('input[name=radios]').prop("disabled",true);
 					}
 				}
+				
+				//create table
+				var content = "<table cellspacing='10'>"
+				content += "<tr><th>User</th><th style='padding-left:25px'>Score</th></tr>";
+				for(var i=0; i<users.length; i++) {
+					var username = users[i].username;
+					var points = users[i].points;
+					content += '<tr><td>' + username + "</td><td style='padding-left:25px'>" + points + '</td></tr>';
+
+				}
+				content += "</table>"
+				$('#points').append(content);
 			})
 			.catch(function(error) {
 			  console.log(error);

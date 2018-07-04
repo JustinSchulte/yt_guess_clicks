@@ -106,13 +106,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 var routes = require('./public/routes/router');
 app.use('/', routes);
 
-var gameArray; //get refreshed through every 2min API call
+//get refreshed through every 2min API call
+var gameArray; 
+var userArray;
 app.get('/clicks', (req, res) => {
-	console.log("games: " + gameArray + "; users: " + userArray);
 	result = {"games":gameArray, "users":userArray};
-	console.log(result);
-	console.log(gameArray);
-	return result;
+	res.send(result);
 });
 
 
