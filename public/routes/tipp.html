@@ -50,6 +50,18 @@
 		color: white;
 		background-color: #4CAF50;
 	  }
+	  .btn-group input[type="submit"] {
+	    font-size:24px;
+		padding:5px;
+		border-radius: 6px;
+		border: 2px solid #008CBA; 
+		width: 100px;
+	  }
+	  .btn-group input[type="submit"]:hover:enabled {
+		background-color: #008CBA; 
+		color:white; 
+		cursor:pointer;
+	  }
 	  
 	  form {
 		padding:10px;
@@ -229,7 +241,7 @@
 			map = data["tipps"];
 			for (var key in map) {
 				var value = map[key];
-				console.log(key + ": " + value.value + ", " + value.choice);
+				//console.log(key + ": " + value.value + ", " + value.choice);
 				$('#'+key).find('input[name="pointInput"]').val(value.value);
 				$('#'+key).find('input[name=radios][value='+value.choice+']').prop("checked", true);
 			}
@@ -244,16 +256,13 @@
 		setInterval(getMatches, 120000);
 		
 		function getMatches() {
-			console.log("before fetch");
 			fetch('/clicks', {method: 'GET'})
 			.then(function(response) {
-			  console.log("response");
 			  if(response.ok) return response.json();
 			  throw new Error('Request failed.');
 			})
 			.then(function(data) {
 				//check games if already playing or ...
-				console.log(data);
 				matches = data.games;
 				users = data.users;
 				
@@ -275,7 +284,7 @@
 
 				}
 				content += "</table>"
-				$('#points').append(content);
+				$('#points').html(content);
 			})
 			.catch(function(error) {
 			  console.log(error);
@@ -283,6 +292,7 @@
 		}
 		
 		$(function() {
+			//save new Chip-Value to DB and local map
 			$('form').submit(function() {
 				var gameID = $(this).closest("form[id]").attr('id');
 				console.log("form id: " + gameID);
@@ -299,47 +309,62 @@
 					alert("You have to select a team!");
 					return false;
 				}
-				if(chips > myChips) {
-					//stop if not enough chips
-					alert("You dont have that much chips!");
-					return false;
-				}
 				if(map[gameID] != undefined) {
 					var old = map[gameID].value;
 					var diffToOld = chips-old;
+					if(diffToOld > myChips) {
+						//stop if not enough chips
+						alert("You dont have that much chips!");
+						return false;
+					}
 					map[gameID].value = chips;
+					map[gameID].choice = checkedValue;
 					myChips = myChips - diffToOld;
 				} else {
 					var diffToOld = chips;
-					myChips = myChips - diffToOld;
+					if(diffToOld > myChips) {
+						//stop if not enough chips
+						alert("You dont have that much chips!");
+						return false;
+					}
 					map[gameID] = {"value": +chips, "choice": +checkedValue};
+					myChips = myChips - diffToOld;
 				}
 				//disable buttons for 5seconds
-				var inputs = document.getElementsByTagName('input');
-				for (var i = 0; i < inputs.length; i++) {
-					if (inputs[i].type === 'submit') {
-						inputs[i].disabled = true;
+				for(var i=0; i<matches.length; i++) {
+					if(matches[i].state == "SCHEDULED") {
+						$('#' + matches[i].id).find('input[type="submit"]').prop("disabled",true);
 					}
 				}
-				
-				$('#pointView').text("Chips: " + myChips);
-								
-				
+				$('#pointView').text("Chips: " + myChips);						
 				
 				$.ajax({
 					type: 'POST',
 					url: '/clicked',
 					data: {myID, chips, checkedValue, gameID, diffToOld}
 				});
-				setTimeout(function(){
-					//enable buttons after 5seconds
-					var inputs = document.getElementsByTagName('input');
-					for (var i = 0; i < inputs.length; i++) {
-						if (inputs[i].type === 'submit') {
-							inputs[i].disabled = false;
+				
+				//enable buttons after 5seconds, show countdown
+				var count = 4;
+				var interval = setInterval(function(){
+					if(count == 0) {
+						for(var i=0; i<matches.length; i++) {
+							if(matches[i].state == "SCHEDULED") {
+								$('#' + matches[i].id).find('input[type="submit"]').prop("disabled",false);
+								$('#' + matches[i].id).find('input[type="submit"]').prop('value', 'SAVE');
+							}
+						}
+						clearInterval(interval);
+					} else {
+						for(var i=0; i<matches.length; i++) {
+							if(matches[i].state == "SCHEDULED") {
+								$('#' + matches[i].id).find('input[type="submit"]').prop('value', count);
+							}
 						}
 					}
-				},5000);
+					count--;
+				},1000);
+				
 				return false;
 			}); 
 		})
