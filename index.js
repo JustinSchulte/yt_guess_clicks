@@ -533,14 +533,18 @@ function wm_games() {
 											if(users[k].tipps[gameID] != undefined) {
 												console.log("uh yeah theres a vote");
 												var reward = users[k].tipps[gameID].value;
+												console.log("reward_before:" + reward);
 												var vote = users[k].tipps[gameID].choice;
 												var quote = 0;
+												console.log("vote: " + vote);
+												console.log("winner: " + matches[i].score.winner);
 												if(vote == 0 && matches[i].score.winner == "HOME_TEAM") {
 													quote = games[j].quoteHome;
 												} else if(vote == 1 && matches[i].score.winner == "DRAW") {
 													quote = games[j].quoteDraw;
 												} else if(vote == 2 && matches[i].score.winner == "AWAY_TEAM") {
 													quote = games[j].quoteAway;
+													console.log("reward_after:" + reward);
 												} else if(matches[i].score.winner == "DRAW" && matches[i].score.duration != "REGULAR") {
 													//prüfe nach ExtraTime/Penalty den Sieg
 													if(matches[i].score.duration != "PENALTY_SHOOTOUT") {
@@ -561,18 +565,10 @@ function wm_games() {
 												}
 												reward = reward * quote;
 												reward = Math.ceil(reward)
+												console.log("reward_now:" + reward);
 												
 												//update users db
-												User.findOne({username: users[k].username}, function (err, user) {
-													user.points = parseInt(user.points) + reward,
-													user.password = user.passwordConf,
-													
-													user.save(function (err) {
-														if(err) {
-															console.error('ERROR!');
-														}
-													});
-												});
+												changeUserPoints(users[k].username, reward);
 											}
 										}
 									}
@@ -608,4 +604,18 @@ function wm_games() {
     })
 
 	
+}
+
+function changeUserPoints(name, reward) {
+	User.findOne({username: name}, function (err, user) {
+		console.log("points_before:" + user.points);
+		user.points = parseInt(user.points) + reward,
+		user.password = user.passwordConf,
+		console.log("points_now:" + user.points);
+		user.save(function (err) {
+			if(err) {
+				console.error('ERROR!');
+			}
+		});
+	});
 }
