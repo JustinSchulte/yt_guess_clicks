@@ -496,6 +496,7 @@ function wm_games() {
 			if(matches == undefined) {
 				return console.log("matches is undefined");
 			}
+			//console.log(matches);
 		
 			db.collection('games').find().toArray((err, games) => {
 				if (err) return console.log(err);
