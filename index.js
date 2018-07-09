@@ -496,7 +496,6 @@ function wm_games() {
 			if(matches == undefined) {
 				return console.log("matches is undefined");
 			}
-			//console.log(matches);
 		
 			db.collection('games').find().toArray((err, games) => {
 				if (err) return console.log(err);
@@ -541,28 +540,11 @@ function wm_games() {
 												console.log("winner: " + matches[i].score.winner);
 												if(vote == 0 && matches[i].score.winner == "HOME_TEAM") {
 													quote = games[j].quoteHome;
-												} else if(vote == 1 && matches[i].score.winner == "DRAW") {
+												} else if(vote == 1 && (matches[i].score.winner == "DRAW" || matches[i].score.duration != "REGULAR")) {
 													quote = games[j].quoteDraw;
 												} else if(vote == 2 && matches[i].score.winner == "AWAY_TEAM") {
 													quote = games[j].quoteAway;
 													console.log("reward_after:" + reward);
-												} else if(matches[i].score.winner == "DRAW" && matches[i].score.duration != "REGULAR") {
-													//prüfe nach ExtraTime/Penalty den Sieg
-													if(matches[i].score.duration != "PENALTY_SHOOTOUT") {
-														//nach Verlängerung
-														if(matches[i].score.extraTime.homeTeam > matches[i].score.extraTime.awayTeam && vote == 0) {
-															quote = games[j].quoteHome;
-														} else if(matches[i].score.extraTime.homeTeam < matches[i].score.extraTime.awayTeam && vote == 2){
-															quote = games[j].quoteAway;
-														}
-													} else {
-														//nach Elfmeterschiessen
-														if(matches[i].score.penalties.homeTeam > matches[i].score.penalties.awayTeam && vote == 0) {
-															quote = games[j].quoteHome;
-														} else if(matches[i].score.penalties.homeTeam < matches[i].score.penalties.awayTeam && vote == 2){
-															quote = games[j].quoteAway;
-														}
-													}
 												}
 												reward = reward * quote;
 												reward = Math.ceil(reward)
