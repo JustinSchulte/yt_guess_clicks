@@ -8,28 +8,34 @@
 	  html, body{
 		height: 100%;
 	  }
-	  #wrapper div, iframe {float: left;}
-	  .flex-container {
-		display: flex;
-		flex-direction: column;
-	  }
-	  #contentWrapper {
-		min-height:100%;
-		position:relative;
-		background-size:cover;
-		background-image: url('/images/back3.jpg');
-	  }
 	  #votes {
 		width:70%;
-		border-style: solid;
+		float: left;
+		border-right: 1px solid;
 	  }
 	  #points {
 		width:30%;
-		border-style: solid;
+		overflow: hidden;
+	  }
+	  table {
+	    border-collapse: collapse;
+		width: 100%;
+	  }
+	  th, td {
+		padding: 8px;
+		text-align: left;
+		border-bottom: 1px solid #ddd;
+		font-size: 24px;
 	  }
 	  .backgroundTop {
 		background-size:cover;
 		background-image: url('/images/top3.jpg');
+	  }
+	  .backgroundMain {
+		background-size:cover;
+		background-image: url('/images/back3.jpg');
+		flex-grow: 1;
+		overflow: hidden;
 	  }
 	  .btn-group input[type="radio"] {
 		display: none;
@@ -83,8 +89,7 @@
 				<label style="color:white;font-size:20px;margin-left: 100px;" id="pointView">Chips:</label>
 			</div>
 			<div class="flex-container">
-				<div class="backgroundMain" id="wrapper">
-					<br>
+				<div class="backgroundMain">
 					<div id="votes">
 						<div class="tipp-form">
 							<form id="Croatia_England">
@@ -338,15 +343,15 @@
 				$('#'+key).find('input[name="pointInput"]').val(value.value);
 				$('#'+key).find('input[name=radios][value='+value.choice+']').prop("checked", true);
 			}
-
+			
+			//first loadMatches
+			getMatches();
+			setInterval(getMatches, 120000);
 			
 		  } else {
 			// handle data not found
 		  }
 		}
-		
-		getMatches();
-		setInterval(getMatches, 120000);
 		
 		function getMatches() {
 			fetch('/clicks', {method: 'GET'})
@@ -365,16 +370,38 @@
 						$('#' + matches[i].id).find('input[name="pointInput"]').prop("disabled",false);
 						$('#' + matches[i].id).find('input[type="submit"]').prop("disabled",false);
 						$('#' + matches[i].id).find('input[name=radios]').prop("disabled",false);
+					} else if(matches[i].state == "FINISHED") {
+						//set wrong voted games red
+						var helpVote = map[matches[i].id];
+						if(helpVote != undefined) {
+							var vote = helpVote.choice;
+							var correct = false;
+							console.log("finishedMatch: " + matches[i].id);
+							console.log("vote: " + vote)
+							if(vote == 0 && matches[i].winner == "HOME_TEAM") {
+								correct = true;
+							} else if(vote == 1 && (matches[i].winner == "DRAW" || !matches[i].regular)) {
+								correct = true;
+							} else if(vote == 2 && matches[i].winner == "AWAY_TEAM") {
+								correct = true;
+							}
+							console.log("correct: " + correct);
+							if(!correct) {
+								//set red color
+								var forWhat = $('#' + matches[i].id).find('input[name=radios]:checked').attr('id');
+								$('#' + matches[i].id).find('label[for="' + forWhat + '"]').css("background-color", "red");
+							}
+						}
 					}
 				}
 				
 				//create table
 				var content = "<table cellspacing='10'>"
-				content += "<tr><th>User</th><th style='padding-left:25px'>Score</th></tr>";
+				content += "<tr><th>User</th><th>Score</th></tr>";
 				for(var i=0; i<users.length; i++) {
 					var username = users[i].username;
 					var points = users[i].points;
-					content += '<tr><td>' + username + "</td><td style='padding-left:25px'>" + points + '</td></tr>';
+					content += '<tr><td>' + username + "</td><td>" + points + '</td></tr>';
 
 				}
 				content += "</table>"

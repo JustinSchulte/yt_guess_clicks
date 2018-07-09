@@ -29,7 +29,9 @@ var gameSchema = mongoose.Schema({
   state: String,
   quoteHome: Number,
   quoteAway: Number,
-  quoteDraw: Number
+  quoteDraw: Number,
+  winner: String,
+  regular: Boolean
 });
 var game = mongoose.model('game', gameSchema);
 
@@ -464,7 +466,7 @@ function wm_games() {
 
     var options = {
         hostname: 'api.football-data.org',
-        path: '/v2/competitions/2000/matches',
+        path: '/v2/competitions/2000/matches', //2000 = WM
 		headers: { 'X-Auth-Token': '07042891263a4116b3c3911ed00165f8' }
     };
 
@@ -500,6 +502,7 @@ function wm_games() {
 			db.collection('games').find().toArray((err, games) => {
 				if (err) return console.log(err);
 				gameArray = games;
+				
 				db.collection('users').find().toArray((err, users) => {
 					if (err) return console.log(err);
 					//create userArray without passwords
@@ -519,14 +522,8 @@ function wm_games() {
 									if(games[j].state == "SCHEDULED" || games[j].state == "IN_PLAY") {
 										//scheduled changed to finished -> refresh and update points
 										//update games db
-										game.findOne({id: games[j].id}, function (err, match) {
-											match.state = "FINISHED";
-											match.save(function (err) {
-												if(err) {
-													console.error('ERROR!');
-												}
-											});
-										});
+										var regular = (matches[i].score.duration == "REGULAR");
+										updateFinishedGame(gameID, matches[i].score.winner, regular);
 										
 										//iterate users
 										for(var k=0; k<users.length; k++) {
@@ -596,6 +593,19 @@ function changeUserPoints(name, reward) {
 		user.password = user.passwordConf,
 		console.log("points_now:" + user.points);
 		user.save(function (err) {
+			if(err) {
+				console.error('ERROR!');
+			}
+		});
+	});
+}
+
+function updateFinishedGame(game_id, winner, regular) {
+	game.findOne({id: game_id}, function (err, match) {
+		match.state = "FINISHED";
+		match.winner = winner;
+		match.regular = regular;
+		match.save(function (err) {
 			if(err) {
 				console.error('ERROR!');
 			}
