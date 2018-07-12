@@ -9,7 +9,7 @@ var apiKey_google = "AIzaSyAGgtcwTX7vyMrkLMBp7dmevMmIy_XBdS0";
 
 var app = require('express')();
 var http = require('http');
-var http_server = http.Server(app);
+var http_server = require('http').Server(app);
 var io = require('socket.io')(http_server);
 var port = process.env.PORT || portt;
 
@@ -122,6 +122,10 @@ app.get('/clicks', (req, res) => {
 getFrequentSoccerStats(); //GET Soccer wm games
 
 io.on('connection', function(socket){
+	//INIT IF CONNECTED
+	//socket.emit('setIPPORT', ip, portt); //NOT NECESSARY?!?!
+	//console.log("testConnect");
+	
 	//memes
 	socket.on('memes', function(){
 		const fs = require('fs');
@@ -135,8 +139,6 @@ io.on('connection', function(socket){
 		});
 	});
 	
-	//INIT IF CONNECTED
-	//socket.emit('setIPPORT', ip, portt); //NOT NECESSARY?!?!
 	socket.on('gameConnection', function(){
 		wm_points.set(socket, 0);
 		wm_afk.set(socket, false);
