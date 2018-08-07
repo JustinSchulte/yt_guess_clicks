@@ -3,7 +3,7 @@ var ip = "localhost";
 var portt = "3000";
 
 //API KEYS
-var apiKey_random = "764SPKrj5Bm0oJIMqrii8tCj5rAycyHjGvW0J7dcNvTAlV1B7kpMjsqRitIA";
+var apiKey_random = "YT2OVDgMTOtT8ExjmHxe7nfEyEbBlyKUIioN11igqaa7IpzNLCrykernyT43";
 var apiKey_google = "AIzaSyAGgtcwTX7vyMrkLMBp7dmevMmIy_XBdS0";
 
 
@@ -124,7 +124,7 @@ getFrequentSoccerStats(); //GET Soccer wm games
 io.on('connection', function(socket){
 	//INIT IF CONNECTED
 	//socket.emit('setIPPORT', ip, portt); //NOT NECESSARY?!?!
-	//console.log("testConnect");
+	console.log("testConnect");
 	
 	//memes
 	socket.on('memes', function(){
