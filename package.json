@@ -6,12 +6,15 @@
   "dependencies": {
     "bcrypt": "^2.0.1",
     "body-parser": "^1.18.3",
+    "btoa": "^1.2.1",
+    "btoa-atob": "^0.1.2",
     "connect-mongo": "^2.0.1",
     "express": "^4.16.2",
     "express-handlebars": "^3.0.0",
     "express-session": "^1.15.6",
     "jquery": "^3.2.1",
     "mongoose": "^5.1.6",
+    "mysportsfeeds-node": "^2.0.1",
     "request": "^2.83.0",
     "serve-favicon": "^2.4.5",
     "socket.io": "^2.0.4"

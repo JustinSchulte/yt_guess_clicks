@@ -76,6 +76,9 @@ app.get('/memes', function(req, res){
 app.get('/wm', function(req, res){
 	res.sendFile(__dirname + '/wm.html');
 });
+app.get('/autochess', function(req, res){
+	res.sendFile(__dirname + '/autochess.html');
+});
 
 app.use(express.static(path.join(__dirname, 'public')));
 var favicon = require('serve-favicon');
@@ -119,7 +122,8 @@ app.get('/clicks', (req, res) => {
 
 
 //AT START
-getFrequentSoccerStats(); //GET Soccer wm games
+//getFrequentSoccerStats(); //GET Soccer wm games
+getFrequentNFLStats();
 
 io.on('connection', function(socket){
 	//INIT IF CONNECTED
@@ -461,6 +465,79 @@ function notAvailableVideo() {
 function getFrequentSoccerStats() {
 	setTimeout(wm_games, 1000*5);
 	setInterval(wm_games, 1000*120);
+}
+
+function getFrequentNFLStats() {
+	console.log("get nfl stats soon");
+	//setTimeout(nfl_games, 1000*5); //TODO ?!?!!?
+	//setInterval(nfl_games, 1000*120);
+}
+
+function nfl_games() {
+	var wikiData;
+
+    /*var options = {
+        hostname: 'api.hooksdata.io',
+        path: '/v1/fetch',
+		header: 'content-type: application/json',
+		data: '{"query": "SELECT * FROM SoccerGames"}',
+		method: 'POST'
+    };*/
+	//var url_request = "http://api.hooksdata.io/v1/fetch?query=SELECT%20%2A%20FROM%20NFLGames%20"
+	
+	/*const httpTransport = require('https');
+	const btoh = require('btoa');
+    const responseEncoding = 'utf8';
+    const httpOptions = {
+        hostname: 'api.mysportsfeeds.com',
+        port: '443',
+        path: '/v2.0/pull/nfl/2018-2019/games.json',
+        method: 'GET',
+        headers: {"Authorization":"Basic " + Buffer.from('c7f39a66-dcac-45cc-9bad-a3b502' + ":" + 'MYSPORTSFEEDS').toString('base64')}
+    };
+	httpOptions.headers['User-Agent'] = 'node ' + process.version;*/
+	
+	var MySportsFeeds = require("mysportsfeeds-node");
+	var msf = new MySportsFeeds("2.0", true);
+	msf.authenticate("c7f39a66-dcac-45cc-9bad-a3b502", "MYSPORTSFEEDS");
+	var data = msf.getData('nfl', 'current', 'seasonal_games', 'json', {});
+	console.log(data);
+
+	/*console.log("get nfl stats NOW!")
+    var req = httpTransport.request(httpOptions, function(res) {
+
+        if (!res) { 
+            wikiData = "An error occured!";
+        };
+
+        var body = '';
+        console.log("statusCode: ", res.statusCode);
+        res.setEncoding('utf8');
+
+        res.on('data', function(data) {
+            body += data;
+        });
+
+        res.on('end', function() {
+			try {
+				wikiData = JSON.parse(body);
+			} catch(err) {
+				console.log(body);
+				return console.log("PARSING ERROR: \n" + err);
+			}
+            
+			if(wikiData == undefined) {
+				return console.log("wikiData is undefined");
+			}
+			//IF EVERYTHING WORKS OUT
+			console.log(wikiData.items[0]);
+        });
+    });
+
+    req.end();
+    req.on('error', function (err) {
+        wikiData = "API down?!?!";
+    })*/
 }
 
 function wm_games() {
