@@ -1,0 +1,532 @@
+<!doctype html>
+<html>
+	<head>
+		<title>AutoChess</title>
+		<style>
+			* { margin: 0; padding: 0; box-sizing: border-box; font-size:24px;}
+			body { font: 24px Helvetica, Arial; display:flex; flex-direction: column;}
+			html, body{
+				height: 100%;
+			}
+			.button { 
+				padding:1px;
+				border-radius: 6px;
+				width:4em;
+				border: 2px solid #4CAF50;
+				margin:-1px
+			}
+			.button:hover {
+				background-color: #4CAF50; /* Green */
+				color: white;
+				cursor:pointer;
+			}
+			.backgroundTop {
+				background-size:cover;
+				background-image: url('/images/top3.jpg');
+			}
+			.backgroundMain {
+				background-size:cover;
+				flex-grow: 1;
+				background-image: url('/images/back3.jpg');
+			}
+		</style>
+	</head>
+	
+	<body>
+		<div class="backgroundTop" style="font-size:24px; padding:5px">
+			<a href="/" style="text-decoration: none; margin-right: 20px;">
+				<img id="icon" src="/images/teewurst_icon_white.ico" alt="Icon" style="width:32px;height:32px;">
+			</a>
+			<span style="color:white;font-size:24px">AutoChess</span>
+		</div>
+		<div class="backgroundMain" style="font-size:24px; padding:10px;">
+			<input id="searchInput" type="text" name="search" placeholder="search..." required="" onchange="searchFunction()" style="margin:10px">
+			<select id="spSelect" style="width:180px" onchange="searchFunction(); sortFunction()">
+				<option>All</option>
+				<option id="Beast">Beast</option>
+				<option id="Demon">Demon</option>
+				<option id="Dragon">Dragon</option>
+				<option id="Dwarf">Dwarf</option>
+				<option id="Element">Element</option>
+				<option id="Elf">Elf</option>
+				<option id="Goblin">Goblin</option>
+				<option id="Human">Human</option>
+				<option id="Naga">Naga</option>
+				<option id="Ogre">Ogre</option>
+				<option id="Orc">Orc</option>
+				<option id="Satyr">Satyr</option>
+				<option id="Troll">Troll</option>
+				<option id="Undead">Undead</option>
+			</select>
+			<select id="clSelect" style="width:180px" onchange="searchFunction(); sortFunction()">
+				<option>All</option>
+				<option id="Assassin">Assassin</option>
+				<option id="DemonHunter">DemonHunter</option>
+				<option id="Druid">Druid</option>
+				<option id="Hunter">Hunter</option>
+				<option id="Knight">Knight</option>
+				<option id="Mage">Mage</option>
+				<option id="Mech">Mech</option>
+				<option id="Shaman">Shaman</option>
+				<option id="Warlock">Warlock</option>
+				<option id="Warrior">Warrior</option>
+			</select>
+			<select id="costSelect" style="width:100px" onchange="searchFunction(); sortFunction()">
+				<option>All</option>
+				<option style="color:#BAC2C4">1</option>
+				<option style="color:#BFBCFF">2</option>
+				<option style="color:#6463FF">3</option>
+				<option style="color:#FA0AFF">4</option>
+				<option style="color:#FF8700">5</option>
+			</select>
+			<button class="button" id="queryReset" onclick="queryReset()">Reset</button>
+			<label style="margin-left:40px" for="sortSelect"> Sort by: </label>
+			<select id="sortSelect" style="width:120px" onchange="sortFunction()">
+				<option>Suggest</option>
+				<option>Cost</option>
+				<option>Species</option>
+				<option>Class</option>
+			</select>
+			<hr>
+			<div class="chessSelect" style="font-size:24px; padding:10px; > <!--width: 50%; box-sizing:border-box;"-->
+				<b>Heroes:</b>
+				<br>
+				<div class="chessArray"></div>
+				<br>
+				<b>Draft:</b>
+				<br>
+				<div class="chessDraft"></div>
+				<br>
+				<b>Boni:</b>
+				<br>
+				<div class="chessBoni" style="overflow: hidden;font-size:12px;"></div>
+			</div>
+		</div>
+		
+		
+		
+		<script src="/scripts/socket.io.js"></script>
+		<script src="/scripts/jquery-1.11.1.js"></script>
+		<script>
+			//konstruktor
+			function Hero(name, sp, cl, cost, src) {
+				this.name = name;
+				this.sp = sp;
+				this.cl = cl;
+				this.cost = cost;
+				this.src = src;
+				this.selected = false;
+				this.query = true;
+				this.icon = document.createElement('img');
+			}
+			
+			var SpeciesMap = new Map();
+			SpeciesMap.set("Beast", {name: "Beast", boni:["","+10%attack damage(all)","+10%attack damage(all)","+15%attack damage(all)","+15%attack damage(all)","+20%attack damage(all)"], color:"#00557A", draftCounter:0});
+			SpeciesMap.set("Demon", {name: "Demon", boni:["+50% damage(Demons)"], color:"#4179A0", draftCounter:0});
+			SpeciesMap.set("Dragon", {name: "Dragon", boni:["","","100Mana start(Dragons)"], color:"#C5C7E0", draftCounter:0});
+			SpeciesMap.set("Dwarf", {name: "Dwarf", boni:[], color:"#669335", draftCounter:0});
+			SpeciesMap.set("Element", {name: "Element", boni:["","30%stone ch(Element)","30%stone ch(Element)","30%stone ch(all)"], color:"#A7BF09", draftCounter:0});
+			SpeciesMap.set("Elf", {name: "Elf", boni:["","","+20% evasion(Elfs)","+20% evasion(Elfs)","+20% evasion(Elfs)","+45% evasion(Elfs)","+45% evasion(Elfs)","+45% evasion(Elfs)","+75% evasion(Elfs)"], color:"#99384A", draftCounter:0});
+			SpeciesMap.set("Goblin", {name: "Goblin", boni:["","","+15armor,+10HPreg(random)","+15armor,+10HPreg(random)","+15armor,+10HPreg(random)","+15armor,+10HPreg(all)"], color:"#75001F", draftCounter:0});
+			SpeciesMap.set("Human", {name: "Human", boni:["","20%silence ch(Humans)","20%silence ch(Humans)","25%silence ch(Humans)","25%silence ch(Humans)","30%silence ch(Humans)"], color:"#E5DD69", draftCounter:0});
+			SpeciesMap.set("Naga", {name: "Naga", boni:["","+30%magic res(all)","+30%magic res(all)","+60%magic res(all)"], color:"#E59859", draftCounter:0});
+			SpeciesMap.set("Ogre", {name: "Ogre", boni:[], color:"#E55147", draftCounter:0});
+			SpeciesMap.set("Orc", {name: "Orc", boni:["","+200HP(Orcs)","+200HP(Orcs)","+500HP(Orcs)"], color:"#0D1321", draftCounter:0});
+			SpeciesMap.set("Satyr", {name: "Satyr", boni:[], color:"#AFE0CE", draftCounter:0});
+			SpeciesMap.set("Troll", {name: "Troll", boni:["","+35attack speed(Trolls)","+35attack speed(Trolls)","+30attack speed(all)"], color:"#FFDCC4", draftCounter:0});
+			SpeciesMap.set("Undead", {name: "Undead", boni:["","-4armor(enemies)","-4armor(enemies)","-6armor(enemies)"], color:"#335145", draftCounter:0});
+			
+			var ClassMap = new Map();
+			ClassMap.set("Assassin", {name: "Assassin", boni:["","","10%ch 300%crit(Assassins)","10%ch 300%crit(Assassins)","10%ch 300%crit(Assassins)","15%ch 400%crit(Assassins)","15%ch 400%crit(Assassins)","15%ch 400%crit(Assassins)","20%ch 500%crit(Assassins)"], color:"#CC729E", draftCounter:0});
+			ClassMap.set("DemonHunter", {name: "DemonHunter", boni:["negate Demon(enemy)", "Demons retain power"], color:"#BA65AC", draftCounter:0});
+			ClassMap.set("Druid", {name: "Druid", boni:["","trade 2* for **(Druids)","trade 2* for **(Druids)","trade 2** for ***(Druids)"], color:"#8D598C", draftCounter:0});
+			ClassMap.set("Hunter", {name: "Hunter", boni:["","","+25%attack damage(Hunter)","+25%attack damage(Hunter)","+25%attack damage(Hunter)","+55%attack damage(Hunter)"], color:"#3F3F59", draftCounter:0});
+			ClassMap.set("Knight", {name: "Knight", boni:["","30%shield ch(Knights)","30%shield ch(Knights)","30%2nd shield ch(Knights)","30%2nd shield ch(Knights)","30%3rd shield ch(Knights)"], color:"#808782", draftCounter:0});
+			ClassMap.set("Mage", {name: "Mage", boni:["","","-40%magic res(enemies)"], color:"#42F2F7", draftCounter:0});
+			ClassMap.set("Mech", {name: "Mech", boni:["","+15HPreg(Mechs)","+15HPreg(Mechs)","+40HPreg(Mechs)"], color:"#D1FFD7", draftCounter:0});
+			ClassMap.set("Shaman", {name: "Shaman", boni:["","hex a random unit"], color:"#B3FFB3", draftCounter:0});
+			ClassMap.set("Warlock", {name: "Warlock", boni:["","","+20%lifesteel(all)","+20%lifesteel(all)","+20%lifesteel(all)","+30%lifesteel(all)"], color:"#5386E4", draftCounter:0});
+			ClassMap.set("Warrior", {name: "Warrior", boni:["","","+7armor(Warrior)","+7armor(Warrior)","+7armor(Warrior)","+15armor(Warrior)","+15armor(Warrior)","+15armor(Warrior)","+24armor(Warrior)"], color:"#DC8E85", draftCounter:0});
+			
+			//set Color to Option Filter
+			SpeciesMap.forEach(function(spec) {
+				document.getElementById(spec.name).style.color = spec.color;
+			});
+			ClassMap.forEach(function(clas) {
+				document.getElementById(clas.name).style.color = clas.color;
+			});
+			
+			var selectedList = [];
+			
+			var suggestedHeroes = [];
+			
+			var heroes = [
+				new Hero("AntiMage", "Elf", "DemonHunter", 1, "/images/autochess/antimage_full.png"),
+				new Hero("Axe", "Orc", "Warrior", 1, "/images/autochess/axe_full.png"),
+				new Hero("BatRider", "Troll", "Knight", 1, "/images/autochess/batrider_full.png"),
+				new Hero("BountyHunter", "Goblin", "Assassin", 1, "/images/autochess/bountyhunter_full.png"),
+				new Hero("Clockwerk", "Goblin", "Mech", 1, "/images/autochess/clockwerk_full.png"),
+				new Hero("DrowRanger", "Undead", "Hunter", 1, "/images/autochess/drowranger_full.png"),
+				new Hero("Enchantress", "Beast", "Druid", 1, "/images/autochess/enchantress_full.png"),
+				new Hero("OgreMagi", "Ogre", "Mage", 1, "/images/autochess/ogremagi_full.png"),
+				new Hero("ShadowShaman", "Troll", "Shaman", 1, "/images/autochess/shadowshaman_full.png"),
+				new Hero("Tinker", "Goblin", "Mech", 1, "/images/autochess/tinker_full.png"),
+				new Hero("Tiny", "Element", "Warrior", 1, "/images/autochess/tiny_full.png"),
+				new Hero("Tusk", "Beast", "Warrior", 1, "/images/autochess/tusk_full.png"),
+				new Hero("BeastMaster", "Orc", "Hunter", 2, "/images/autochess/beastmaster_full.png"),
+				new Hero("ChaosKnight", "Demon", "Knight", 2, "/images/autochess/chaosknight_full.png"),
+				new Hero("Crystal", "Human", "Mage", 2, "/images/autochess/crystal_full.png"),
+				new Hero("Furion", "Elf", "Druid", 2, "/images/autochess/furion_full.png"),
+				new Hero("Juggernaut", "Orc", "Warrior", 2, "/images/autochess/juggernaut_full.png"),
+				new Hero("Luna", "Elf", "Knight", 2, "/images/autochess/luna_full.png"),
+				new Hero("Morphling", "Element", "Assassin", 2, "/images/autochess/morphling_full.png"),
+				new Hero("PainQueen", "Demon", "Assassin", 2, "/images/autochess/painqueen_full.png"),
+				new Hero("Puck", ["Elf", "Dragon"], "Mage", 2, "/images/autochess/puck_full.png"),
+				new Hero("Slardar", "Naga", "Warrior", 2, "/images/autochess/slardar_full.png"),
+				new Hero("Timbersaw", "Goblin", "Mech", 2, "/images/autochess/timbersaw_full.png"),
+				new Hero("TreantProtector", "Elf", "Druid", 2, "/images/autochess/treantprotector_full.png"),
+				new Hero("WitchDoctor", "Troll", "Warlock", 2, "/images/autochess/witchdoctor_full.png"),
+				new Hero("Slark", "Naga", "Assassin", 2, "/images/autochess/slark_full.png"),
+				new Hero("Abaddon", "Undead", "Knight", 3, "/images/autochess/abaddon_full.png"),
+				new Hero("Lina", "Human", "Mage", 3, "/images/autochess/lina_full.png"),
+				new Hero("Lycan", ["Human", "Beast"], "Warrior", 3, "/images/autochess/lycan_full.png"),
+				new Hero("OmniKnight", "Human", "Knight", 3, "/images/autochess/omniknight_full.png"),
+				new Hero("PhantomAssassin", "Elf", "Assassin", 3, "/images/autochess/phantomassassin_full.png"),
+				new Hero("Razor", "Element", "Mage", 3, "/images/autochess/razor_full.png"),
+				new Hero("SandKing", "Beast", "Assassin", 3, "/images/autochess/sandking_full.png"),
+				new Hero("ShadowFiend", "Demon", "Warlock", 3, "/images/autochess/shadowfiend_full.png"),
+				new Hero("Sniper", "Dwarf", "Hunter", 3, "/images/autochess/sniper_full.png"),
+				new Hero("Terrorblade", "Demon", "DemonHunter", 3, "/images/autochess/terrorblade_full.png"),
+				new Hero("Venomancer", "Beast", "Warlock", 3, "/images/autochess/venomancer_full.png"),
+				new Hero("Viper", "Dragon", "Assassin", 3, "/images/autochess/viper_full.png"),
+				new Hero("Riki", "Satyr", "Assassin", 3, "/images/autochess/riki_full.png"),
+				new Hero("Mirana", "Elf", "Hunter", 3, "/images/autochess/mirana_full.png"),
+				new Hero("WindRanger", "Elf", "Hunter", 3, "/images/autochess/windranger_full.png"),
+				new Hero("Alchemist", "Goblin", "Warlock", 4, "/images/autochess/alchemist_full.png"),
+				new Hero("Disruptor", "Orc", "Shaman", 4, "/images/autochess/disruptor_full.png"),
+				new Hero("Doom", "Demon", "Warrior", 4, "/images/autochess/doom_full.png"),
+				new Hero("DragonKnight", ["Human", "Dragon"], "Knight", 4, "/images/autochess/dragonknight_full.png"),
+				new Hero("Kunkka", "Human", "Warrior", 4, "/images/autochess/kunkka_full.png"),
+				new Hero("LightKeeper", "Human", "Mage", 4, "/images/autochess/lightkeeper_full.png"),
+				new Hero("LoneDruid", "Beast", "Druid", 4, "/images/autochess/lonedruid_full.png"),
+				new Hero("Medusa", "Naga", "Hunter", 4, "/images/autochess/medusa_full.png"),
+				new Hero("Necrophos", "Undead", "Warlock", 4, "/images/autochess/necrophos_full.png"),
+				new Hero("TemplarAssassin", "Elf", "Assassin", 4, "/images/autochess/templarassassin_full.png"),
+				new Hero("Troll", "Troll", "Warrior", 4, "/images/autochess/troll_full.png"),
+				new Hero("DeathProphet", "Undead", "Warlock", 5, "/images/autochess/deathprophet_full.png"),
+				new Hero("Enigma", "Element", "Warlock", 5, "/images/autochess/enigma_full.png"),
+				new Hero("Gyrocopter", "Dwarf", "Mech", 5, "/images/autochess/gyrocopter_full.png"),
+				new Hero("Lich", "Undead", "Mage", 5, "/images/autochess/lich_full.png"),
+				new Hero("Techies", "Goblin", "Mech", 5, "/images/autochess/techies_full.png"),
+				new Hero("TideHunter", "Naga", "Hunter", 5, "/images/autochess/tidehunter_full.png"),
+			];
+			
+			heroes.forEach(function(hero) {
+			  //initial
+			  var img = hero.icon;
+			  img.style.margin = "2px";
+			  setSpeciesBorder(img, hero.sp);
+			  setClassBorder(img, hero.cl);
+			  setCostBorder(img, hero.cost);
+			  img.src = hero.src;
+			  img.title = hero.name+"\n  "+hero.sp+"\n  "+hero.cl;
+			  img.height = "54"; //"36";
+			  img.width = "96"; //"64";
+			  img.style.WebkitFilter = "opacity(50%)";
+			  document.getElementsByClassName('chessArray')[0].appendChild(img);  //initial hinzufügen zum SelectArray
+			  
+			  //hover, click action
+			  img.onmouseover = function(evt) {
+				  this.style.WebkitFilter += "blur(2px)";
+			  }
+			  img.onmouseout = function(evt) {
+				  this.style.WebkitFilter = "";
+				  if(!suggestedHeroes.includes(hero) && !hero.selected) {
+					img.style.WebkitFilter = "opacity(50%)";
+				  }
+			  }
+			  img.onmousedown = function(evt) {
+				  //do anything?!
+			  }
+			  img.onmouseup = function(evt) {
+				if(hero.selected) {
+				  //delete hero from selectedList
+				  hero.selected = false;
+				  selectedList = selectedList.filter(item => item !== hero); 
+				  checkBoni();
+				  var input = document.getElementById("searchInput");
+				  if(hero.name.toLowerCase().includes(input.value.toLowerCase())) {
+					document.getElementsByClassName('chessArray')[0].appendChild(img); //if query accept hero
+					sortFunction();
+				  } else {
+					document.getElementsByClassName('chessDraft')[0].removeChild(img); //else not visible
+				  }
+				} else if(selectedList.length < 10){
+			      //add hero to selectedList
+				  hero.selected = true;
+				  selectedList.push(hero); 
+				  checkBoni();
+				  img.style.WebkitFilter = "";
+				  document.getElementsByClassName('chessDraft')[0].appendChild(img);
+				  sortFunction(); // necessary for suggest-Sort
+				}
+			  }
+			});
+			sortFunction(); //initial sortieren
+			
+			//BEGIN FUNCTIONS
+			function setSpeciesBorder(img, sp) {
+			  count_sp = 0;
+			  borderOption = "4px solid ";
+			  SpeciesMap.forEach(function(type) {
+			  	if(sp.includes(type.name)) {
+					if(count_sp == 0) {
+						img.style.borderLeft = borderOption + type.color;
+						count_sp = 1;
+					}
+					else if(count_sp == 1){
+						img.style.borderRight = borderOption + type.color;
+						return; //there are max 2species for one hero
+					}
+				}
+			  });
+			}
+			
+			function setClassBorder(img, cl) {
+			  borderOption = "4px solid ";
+			  ClassMap.forEach(function(type) {
+				if(cl.includes(type.name)) {
+					img.style.borderTop = borderOption + type.color;
+					return;
+				}
+			  });
+			}
+			
+			function setCostBorder(img, cost) {
+				borderOption = "4px solid ";
+				if(cost == 1) {
+				  img.style.borderBottom = borderOption + "#BAC2C4";
+				} else if(cost == 2) {
+				  img.style.borderBottom = borderOption + "#BFBCFF";
+				} else if(cost == 3) {
+				  img.style.borderBottom = borderOption + "#6463FF";
+				} else if(cost == 4) {
+				  img.style.borderBottom = borderOption + "#FA0AFF";
+				} else if(cost == 5) {
+				  img.style.borderBottom = borderOption + "#FF8700";
+				}
+			}
+			
+			function checkBoni(){
+				//first remove all boni and suggestions
+				chessBoni = document.getElementsByClassName("chessBoni")[0];
+				while(chessBoni.firstChild) {
+					chessBoni.removeChild(chessBoni.firstChild); 
+				}
+				suggestedHeroes = [];
+			
+				//set all counters to 0
+				SpeciesMap.forEach(function(type) {
+					type.draftCounter = 0;
+				});
+				ClassMap.forEach(function(type) {
+					type.draftCounter = 0;
+				});
+				
+				//count appearances
+				selectedList.forEach(function(hero) {
+				  sp = hero.sp;
+				  SpeciesMap.forEach(function(type) {
+					if(sp.includes(type.name)) {
+						type.draftCounter++;
+					}
+				  });
+				  cl = hero.cl;
+				  ClassMap.forEach(function(type) {
+					if(cl == type.name) {
+						type.draftCounter++;
+					}
+				  });
+				});
+				
+				//show all boni
+				divList = [];
+				SpeciesMap.forEach(function(type) {
+					div = addBonusDiv(type);
+					if(div != undefined) {
+						divList.push(div);
+					}
+				});
+				ClassMap.forEach(function(type) {
+					div = addBonusDiv(type);
+					if(div != undefined) {
+						divList.push(div);
+					}
+				});
+				divList.sort(countDraftSelect);
+				divList.forEach(function(div) {
+					chessBoni.appendChild(div.div);
+				});
+				
+				//suggest heroes
+				heroes.forEach(function(hero) {
+					if(!hero.selected) {
+						img = hero.icon;
+						if(suggestedHeroes.includes(hero)) {
+							img.style.WebkitFilter = "";
+						} else {
+							img.style.WebkitFilter = "opacity(50%)";
+						}
+					}
+				});
+			}
+			
+			function countDraftSelect(a,b) {
+				if (a.count < b.count)
+					return 1;
+				  if (a.count > b.count)
+					return -1;
+				  return 0;
+			}
+			
+			function addBonusDiv(type) {
+				index = Math.min(type.boni.length, type.draftCounter) - 1;
+				bonus = type.boni[index];
+				string = "";
+				string2 = "";
+				if(bonus != undefined && bonus != "") {
+					if(type.name=="Demon" && type.draftCounter>1 && ClassMap.get("DemonHunter").draftCounter<2) {
+						//check demon and demonhunter special case
+						bonus = "too many demons!";
+					}
+					string += bonus;
+				}
+				if(type.draftCounter>0 && type.draftCounter < type.boni.length) {
+					//there is a higher bonus
+					markPossibleHeroes(type.name); //mark heroes giving bonus
+					diff = 1; //diff til next bonus
+					while(type.boni[index+1] == type.boni[index]) {
+						index++;
+						diff++;
+					}
+					string2 = "<b style=\"font-size:12px\";>" + diff + "</b> more <b style=\"font-size:12px\";>" + type.name + "</b> for " + type.boni[index+1];
+				}
+				if(string != "" || string2 != "") {
+					div = document.createElement("div");
+					div1 = document.createElement("div");
+					div1.innerHTML = string;
+					div1.style.fontSize = "18px";
+					div1.style.color = "#008148";
+					div2 = document.createElement("div");
+					div2.innerHTML = string2;
+					div2.style.fontSize = "12px";
+					div2.style.color = "#D18B00";
+					div.appendChild(div1);
+					div.appendChild(div2);
+					div.style.cssFloat = "left";
+					div.style.marginRight = "10px";
+					div.style.marginTop = "10px";
+					div.style.padding = "5px";
+					div.style.width = "290px";
+					div.style.height = "60px";
+					div.style.backgroundColor = "#EFF1ED";
+					div.style.border = "4px solid black";
+					return {div: div, count: type.draftCounter};
+				}
+				return undefined;
+			}
+			
+			function markPossibleHeroes(name) {
+				//search for possible heroes, giving new bonus
+				heroes.forEach(function(hero) {
+					if(!hero.selected){
+						if(hero.sp.includes(name) || hero.cl == name) {
+							suggestedHeroes.push(hero);
+						}
+					}
+				});
+			}
+			
+			function searchFunction() {
+				var input = document.getElementById("searchInput").value.toLowerCase();
+				var species = document.getElementById("spSelect").value;
+				var classs = document.getElementById("clSelect").value;
+				var cost = document.getElementById("costSelect").value;
+			
+				heroes.forEach(function(hero) {
+					if(hero.selected) return; //query doesnt affect selected					
+					if(hero.name.toLowerCase().includes(input) && (hero.sp.includes(species)||species=="All")  && (hero.cl==classs||classs=="All") && (hero.cost == cost||cost=="All")){
+						if(!hero.query) {
+							document.getElementsByClassName('chessArray')[0].appendChild(hero.icon);
+						}
+						hero.query = true;
+					} else {
+						if(hero.query) {
+							document.getElementsByClassName('chessArray')[0].removeChild(hero.icon);
+						}
+						hero.query = false;
+					}
+				});
+			}
+			
+			function sortFunction() {
+			var sortby = document.getElementById("sortSelect").value;
+				switch(sortby) {
+					case "Cost": heroes.sort(costSearch); break;
+					case "Species": heroes.sort(speciesSearch); break;
+					case "Class": heroes.sort(classSearch); break;
+					case "Suggest": heroes.sort(suggestSearch); break;
+				}
+				heroes.forEach(function(hero) {
+					if(hero.selected) return; //query doesnt affect selected
+					if(hero.query){
+						document.getElementsByClassName('chessArray')[0].removeChild(hero.icon);
+						document.getElementsByClassName('chessArray')[0].appendChild(hero.icon);
+					}
+				});
+				searchFunction();
+			}
+			
+			function suggestSearch(a,b) {
+			  if (suggestedHeroes.includes(a) && !suggestedHeroes.includes(b))
+				return -1;
+			  if (!suggestedHeroes.includes(a) && suggestedHeroes.includes(b))
+				return 1;
+			  return 0;
+			}
+			
+			function costSearch(a,b) {
+			  if (a.cost < b.cost)
+				return -1;
+			  if (a.cost > b.cost)
+				return 1;
+			  return 0;
+			}
+			
+			function speciesSearch(a,b) {
+			  if (a.sp < b.sp)
+				return -1;
+			  if (a.sp > b.sp)
+				return 1;
+			  return 0;
+			}
+			
+			function classSearch(a,b) {
+			  if (a.cl < b.cl)
+				return -1;
+			  if (a.cl > b.cl)
+				return 1;
+			  return 0;
+			}
+			
+			function queryReset() {
+				document.getElementById("searchInput").value = "";
+				document.getElementById("spSelect").value = "All";
+				document.getElementById("clSelect").value = "All";
+				searchFunction();
+				sortFunction();
+			}
+			
+		</script>
+	</body>
+</html>

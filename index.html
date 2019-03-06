@@ -50,6 +50,8 @@
 			<button class="button" id="memes">Memes</button>
 			<br>
 			<button class="button" id="wm">WM-Tippspiel</button>
+			<br>
+			<button class="button" id="chess">AutoChess</button>
 		</div>
 		
 		
@@ -119,6 +121,18 @@
 							break;
 						case 2:
 							window.open("/wm");
+							break;
+						case 3:
+							break;
+					}
+				});
+				$("#chess").on('click auxclick contextmenu', function(e) {
+					switch(e.which) {
+						case 1:
+							window.location = "/autochess";
+							break;
+						case 2:
+							window.open("/autochess");
 							break;
 						case 3:
 							break;
