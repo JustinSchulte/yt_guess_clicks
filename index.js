@@ -3,8 +3,8 @@ var ip = "localhost";
 var portt = "3000";
 
 //API KEYS
-var apiKey_random = "YT2OVDgMTOtT8ExjmHxe7nfEyEbBlyKUIioN11igqaa7IpzNLCrykernyT43";
-var apiKey_google = "AIzaSyAGgtcwTX7vyMrkLMBp7dmevMmIy_XBdS0";
+var apiKey_random = "";
+var apiKey_google = "";
 
 
 var app = require('express')();
@@ -40,6 +40,7 @@ var gameSchema = mongoose.Schema({
 var game = mongoose.model('game', gameSchema);
 
 //NFL Matching
+var actWeek;
 var nflTeam_Map = {
 	"Chicago Bears": "CHI",
 	"Green Bay Packers": "GB",
@@ -162,7 +163,6 @@ app.get('/clicks', (req, res) => { //TODO fill arrays as in wmGames
 
 
 //AT START
-//getFrequentSoccerStats(); //GET Soccer wm games
 getFrequentNFLStats();
 
 io.on('connection', function(socket){
@@ -507,11 +507,15 @@ function getFrequentSoccerStats() {
 	setInterval(wm_games, 1000*120);
 }
 
+
+
 function getFrequentNFLStats() {
 	console.log("get nfl stats soon");
-	//setTimeout(nfl_actMatchday, 1000*5);
+	//refreshUserDB(); //once at start
+	
+	setTimeout(nfl_actMatchday, 1000*5);
 	//setInterval(nfl_actMatchday, 1000*60*60*12); //twice each day
-	setTimeout(getNewGames, 1000*5, 1); //TODO delete
+	//setTimeout(getNewGames, 1000*5, 1); //TODO delete
 	//setTimeout(nfl_games, 1000*10);
 	//setInterval(nfl_games, 1000*60*60*24); //each 30minutes
 	
@@ -528,7 +532,7 @@ function refreshUserDB() {
 
 function refreshGamesDB() {
 	//add games of new week from db
-	db.collection('games').find({week:newWeek}).toArray((err, games) => {
+	db.collection('games').find({week:actWeek}).toArray((err, games) => {
 		if (err) return console.log(err);
 		gameArray = games;
 	});
@@ -568,9 +572,14 @@ function nfl_actMatchday() {
 			
 			//YEAH, WE GOT SOME WIKIDATA, NOW IT BEGINS
 			var newWeek = wikiData;
+			newWeek = 1; //TODO delete
+			actWeek = newWeek;
+			refreshGamesDB(); //once at start
+			refreshUserDB();
+			
 			db.collection('actWeek').find().toArray((err, data) => {
 				if (err) return console.log(err);
-				if(data[0].week == newWeek) {
+				if(data[0].week == actWeek) {
 					return console.log("Week is still up to date, nothing todo!")
 				}
 				//NEW WEEK, change db and look up bets
@@ -579,7 +588,7 @@ function nfl_actMatchday() {
 					{ id: 'act_week' },
 					{ $set: { 'week': wikiData } }
 				);
-				getNewGames(newWeek);
+				getNewGames();
 			});
 			//END
 		});
@@ -591,7 +600,7 @@ function nfl_actMatchday() {
     });
 }
 
-function getNewOdds(newWeek) {
+function getNewOdds() {
 	console.log("GET NEW ODDS");
 	
 	axios.get('https://api.the-odds-api.com/v3/odds', {
@@ -610,8 +619,6 @@ function getNewOdds(newWeek) {
 		}
 		
 		//YEAH, WE GOT SOME WIKIDATA, NOW IT BEGINS
-		
-		
 		
 		//add odds to db
 		for(var i=0; i<wikiData.data.length; i++) {
@@ -644,9 +651,9 @@ function getNewOdds(newWeek) {
 	})
 }
 
-function getNewGames(newWeek) {
+function getNewGames() {
 	console.log("GET NEW GAMES");
-	var pathActWeek = '/v3/nfl/scores/json/ScoresByWeek/2019/' + newWeek;
+	var pathActWeek = '/v3/nfl/scores/json/ScoresByWeek/2019/' + actWeek;
 
 	var wikiData; //JSON Data result
 	var options = {
@@ -684,7 +691,7 @@ function getNewGames(newWeek) {
 				var matchId = match.HomeTeam + "_" + match.AwayTeam;
 				var gameData = {
 					id: matchId,
-					week: newWeek,
+					week: actWeek,
 					state: "NotStarted",
 					home: match.HomeTeam,
 					away: match.AwayTeam,
@@ -698,7 +705,7 @@ function getNewGames(newWeek) {
 					}
 				});
 			}
-			setTimeout(getNewOdds, 1000*5, newWeek);
+			setTimeout(getNewOdds, 1000*5);
 			//END
 		});
 	});
@@ -706,7 +713,7 @@ function getNewGames(newWeek) {
 	req.end();
 	req.on('error', function (err) {
 		console.log("GET NFL GAMES: " + err)
-		setTimeout(getNewGames, 1000*60*10, newWeek); //try again in 10minutes
+		setTimeout(getNewGames, 1000*60*10); //try again in 10minutes
 	});
 }
 
@@ -754,79 +761,78 @@ function nfl_games() {
 				console.log("NOW");
 				var matches = wikiData;
 				
-				db.collection('games').find(({week:newWeek}).toArray((err, games) => {
-				if (err) return console.log(err);
-				
-				db.collection('users').find().toArray((err, users) => {
+				db.collection('games').find({week:actWeek}).toArray((err, games) => {
 					if (err) return console.log(err);
-					//create userArray without passwords
-					userArray = new Array();
-					for(var i=0; i<users.length; i++) {
-						var person = {username:users[i].username, points:users[i].points, tipps:users[i].tipps};
-						userArray.push(person);
-					}
-					
-					
-					for(var i=0; i<matches.length; i++) {
-						if(matches[i].IsOver) { //is Game over?
-							var gameID = matches[i].HomeTeam + "_" + matches[i].AwayTeam;
-							for(var j=0; j<games.length; j++) {
-								if(games[j].id == gameID) {
-									if(games[j].state == "NotStarted" || games[j].state == "HasStarted") {
-										//scheduled changed to finished -> refresh and update points
-										//update games db
-										updateFinishedGame(gameID, matches[i].score.winner);
-										
-										//iterate users
-										for(var k=0; k<users.length; k++) {
-											if(users[k].tipps[gameID] != undefined) {
-												console.log("uh yeah theres a vote");
-												var reward = users[k].tipps[gameID].value;
-												console.log("reward_before:" + reward);
-												var vote = users[k].tipps[gameID].choice;
-												var quote = 0;
-												console.log("vote: " + vote);
-												console.log("winner: " + matches[i].score.winner);
-												if(vote == 0 && matches[i].score.winner == "HOME_TEAM") {
-													quote = games[j].quoteHome;
-												} else if(vote == 1 && (matches[i].score.winner == "DRAW" || matches[i].score.duration != "REGULAR")) {
-													quote = games[j].quoteDraw;
-												} else if(vote == 2 && matches[i].score.winner == "AWAY_TEAM") {
-													quote = games[j].quoteAway;
-													console.log("reward_after:" + reward);
+				
+					db.collection('users').find().toArray((err, users) => {
+						if (err) return console.log(err);
+						//create userArray without passwords
+						userArray = new Array();
+						for(var i=0; i<users.length; i++) {
+							var person = {username:users[i].username, points:users[i].points, tipps:users[i].tipps};
+							userArray.push(person);
+						}
+						
+						for(var i=0; i<matches.length; i++) {
+							if(matches[i].IsOver) { //is Game over?
+								var gameID = matches[i].HomeTeam + "_" + matches[i].AwayTeam;
+								for(var j=0; j<games.length; j++) {
+									if(games[j].id == gameID) {
+										if(games[j].state == "NotStarted" || games[j].state == "HasStarted") {
+											//scheduled changed to finished -> refresh and update points
+											//update games db
+											updateFinishedGame(gameID, matches[i].score.winner);
+											
+											//iterate users
+											for(var k=0; k<users.length; k++) {
+												if(users[k].tipps[gameID] != undefined) {
+													console.log("uh yeah theres a vote");
+													var reward = users[k].tipps[gameID].value;
+													console.log("reward_before:" + reward);
+													var vote = users[k].tipps[gameID].choice;
+													var quote = 0;
+													console.log("vote: " + vote);
+													console.log("winner: " + matches[i].score.winner);
+													if(vote == 0 && matches[i].score.winner == "HOME_TEAM") {
+														quote = games[j].quoteHome;
+													} else if(vote == 1 && (matches[i].score.winner == "DRAW" || matches[i].score.duration != "REGULAR")) {
+														quote = games[j].quoteDraw;
+													} else if(vote == 2 && matches[i].score.winner == "AWAY_TEAM") {
+														quote = games[j].quoteAway;
+														console.log("reward_after:" + reward);
+													}
+													reward = reward * quote;
+													reward = Math.ceil(reward)
+													console.log("reward_now:" + reward);
+													
+													//update users db
+													changeUserPoints(users[k].username, reward);
 												}
-												reward = reward * quote;
-												reward = Math.ceil(reward)
-												console.log("reward_now:" + reward);
-												
-												//update users db
-												changeUserPoints(users[k].username, reward);
 											}
 										}
 									}
 								}
-							}
-						} else if(matches[i].HasStarted) { //has game started?
-							var gameID = matches[i].homeTeam.name + "_" + matches[i].awayTeam.name;
-							for(var j=0; j<games.length; j++) {
-								if(games[j].id == gameID) {
-									if(games[j].state == "SCHEDULED") {
-										//scheduled changed to IN_PLAY -> refresh db games
-										game.findOne({id: games[j].id}, function (err, match) {
-											match.state = "IN_PLAY";
-											match.save(function (err) {
-												if(err) {
-													console.error('ERROR!');
-												}
+							} else if(matches[i].HasStarted) { //has game started?
+								var gameID = matches[i].homeTeam.name + "_" + matches[i].awayTeam.name;
+								for(var j=0; j<games.length; j++) {
+									if(games[j].id == gameID) {
+										if(games[j].state == "SCHEDULED") {
+											//scheduled changed to IN_PLAY -> refresh db games
+											game.findOne({id: games[j].id}, function (err, match) {
+												match.state = "IN_PLAY";
+												match.save(function (err) {
+													if(err) {
+														console.error('ERROR!');
+													}
+												});
 											});
-										});
+										}
 									}
 								}
 							}
 						}
-					}
+					});
 				});
-			});
 				//END
 			});
 		});
