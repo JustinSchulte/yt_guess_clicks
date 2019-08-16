@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-var bcrypt = require('bcrypt');
+var bcrypt = require('bcryptjs');
 
 var UserSchema = new mongoose.Schema({
   username: {
@@ -9,10 +9,6 @@ var UserSchema = new mongoose.Schema({
     trim: true
   },
   password: {
-    type: String,
-    required: true,
-  },
-  passwordConf: {
     type: String,
     required: true,
   },
@@ -48,8 +44,10 @@ UserSchema.statics.authenticate = function (username, password, callback) {
 }
 
 //hashing a password before saving it to the database
+//TODO need to test bycryptjs!
 UserSchema.pre('save', function (next) {
   var user = this;
+  console.log("now!");
   bcrypt.hash(user.password, 10, function (err, hash) {
     if (err) {
       return next(err);

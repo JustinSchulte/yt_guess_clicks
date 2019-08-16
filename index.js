@@ -23,17 +23,58 @@ var session = require('express-session');
 var MongoStore = require('connect-mongo')(session);
 var User = require('./public/models/user');
 
+//ODDS API
+var axios = require('axios');
+
 //GAME-SCHEMA
 var gameSchema = mongoose.Schema({
-  id: String,
-  state: String,
-  quoteHome: Number,
-  quoteAway: Number,
-  quoteDraw: Number,
-  winner: String,
-  regular: Boolean
+	id: String,
+	week: Number,
+	state: String,
+	home: String,
+	away: String,
+	quoteHome: Number,
+	quoteAway: Number,
+	winner: String
 });
 var game = mongoose.model('game', gameSchema);
+
+//NFL Matching
+var nflTeam_Map = {
+	"Chicago Bears": "CHI",
+	"Green Bay Packers": "GB",
+	"Buffalo Bills": "BUF",
+	"New York Jets": "NYJ",
+	"Philadelphia Eagles": "PHI",
+	"Washington Redskins": "WAS",
+	"Baltimore Ravens": "BAL",
+	"Miami Dolphins": "MIA",
+	"Cleveland Browns": "CLE",
+	"Tennessee Titans": "TEN",
+	"Carolina Panthers": "CAR",
+	"Los Angeles Rams": "LAR",
+	"Jacksonville Jaguars": "JAX",
+	"Kansas City Chiefs": "KC",
+	"Atlanta Falcons": "ATL",
+	"Minnesota Vikings": "MIN",
+	"Cincinnati Bengals": "CIN",
+	"Seattle Seahawks": "SEA",
+	"Indianapolis Colts": "IND",
+	"Los Angeles Chargers": "LAC",
+	"Dallas Cowboys": "DAL",
+	"New York Giants": "NYG",
+	"San Francisco 49ers": "SF",
+	"Tampa Bay Buccaneers": "TB",
+	"Arizona Cardinals": "ARI",
+	"Detroit Lions": "DET",
+	"New England Patriots": "NE",
+	"Pittsburgh Steelers": "PIT",
+	"Houston Texans": "HOU",
+	"New Orleans Saints": "NO",
+	"Denver Broncos": "DEN",
+	"Oakland Raiders": "OAK"
+};
+
 
 
 var wm = new WeakMap();
@@ -73,8 +114,8 @@ app.get('/memes', function(req, res){
 app.get('/memes', function(req, res){
 	res.sendFile(__dirname + '/memes.html');
 });
-app.get('/wm', function(req, res){
-	res.sendFile(__dirname + '/wm.html');
+app.get('/nfl', function(req, res){
+	res.sendFile(__dirname + '/nfl.html');
 });
 app.get('/autochess', function(req, res){
 	res.sendFile(__dirname + '/autochess.html');
@@ -86,8 +127,8 @@ app.use(favicon(__dirname + '/public/images/teewurst_icon.ico'));
 
 //NEW
 //connect to MongoDB
-var uri = 'mongodb://schokokroko:toastbrot5@cluster0-shard-00-00-cibks.mongodb.net:27017,cluster0-shard-00-01-cibks.mongodb.net:27017,cluster0-shard-00-02-cibks.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true';
-mongoose.connect(uri + "/wm_game");
+var uri = 'mongodb://schokokroko:toastbrot5@cluster0-shard-00-00-cibks.mongodb.net:27017,cluster0-shard-00-01-cibks.mongodb.net:27017,cluster0-shard-00-02-cibks.mongodb.net:27017/nfl2019?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true&w=majority';
+mongoose.connect(uri);// + "/wm_game");
 var db = mongoose.connection;
 //handle mongo error
 db.on('error', console.error.bind(console, 'connection error:'));
@@ -114,11 +155,10 @@ app.use('/', routes);
 //get refreshed through every 2min API call
 var gameArray; 
 var userArray;
-app.get('/clicks', (req, res) => {
+app.get('/clicks', (req, res) => { //TODO fill arrays as in wmGames
 	result = {"games":gameArray, "users":userArray};
 	res.send(result);
 });
-
 
 
 //AT START
@@ -469,49 +509,47 @@ function getFrequentSoccerStats() {
 
 function getFrequentNFLStats() {
 	console.log("get nfl stats soon");
-	//setTimeout(nfl_games, 1000*5); //TODO ?!?!!?
-	//setInterval(nfl_games, 1000*120);
+	//setTimeout(nfl_actMatchday, 1000*5);
+	//setInterval(nfl_actMatchday, 1000*60*60*12); //twice each day
+	setTimeout(getNewGames, 1000*5, 1); //TODO delete
+	//setTimeout(nfl_games, 1000*10);
+	//setInterval(nfl_games, 1000*60*60*24); //each 30minutes
+	
+	//setInterval(refreshUserDB, 1000*60*5); //each 5minutes
 }
 
-function nfl_games() {
-	var wikiData;
+function refreshUserDB() {
+	//add users from db
+	db.collection('users').find().toArray((err, users) => {
+		if (err) return console.log(err);
+		userArray = users;
+	});
+}
 
-    /*var options = {
-        hostname: 'api.hooksdata.io',
-        path: '/v1/fetch',
-		header: 'content-type: application/json',
-		data: '{"query": "SELECT * FROM SoccerGames"}',
-		method: 'POST'
-    };*/
-	//var url_request = "http://api.hooksdata.io/v1/fetch?query=SELECT%20%2A%20FROM%20NFLGames%20"
+function refreshGamesDB() {
+	//add games of new week from db
+	db.collection('games').find({week:newWeek}).toArray((err, games) => {
+		if (err) return console.log(err);
+		gameArray = games;
+	});
+}
+
+function nfl_actMatchday() {
+	console.log("GET ACTUAL NFL WEEK");
 	
-	/*const httpTransport = require('https');
-	const btoh = require('btoa');
-    const responseEncoding = 'utf8';
-    const httpOptions = {
-        hostname: 'api.mysportsfeeds.com',
-        port: '443',
-        path: '/v2.0/pull/nfl/2018-2019/games.json',
-        method: 'GET',
-        headers: {"Authorization":"Basic " + Buffer.from('c7f39a66-dcac-45cc-9bad-a3b502' + ":" + 'MYSPORTSFEEDS').toString('base64')}
+	var wikiData; //JSON Data result
+    var options = {
+        hostname: 'api.sportsdata.io',
+        path: '/v3/nfl/scores/json/CurrentWeek', //TODO should we use CurrentWeek or UpcomingWeek
+		headers: {'Ocp-Apim-Subscription-Key': '5ddf733575c841fb85dae917a4b5fdd3'},
+		method: 'GET'
     };
-	httpOptions.headers['User-Agent'] = 'node ' + process.version;*/
-	
-	var MySportsFeeds = require("mysportsfeeds-node");
-	var msf = new MySportsFeeds("2.0", true);
-	msf.authenticate("c7f39a66-dcac-45cc-9bad-a3b502", "MYSPORTSFEEDS");
-	var data = msf.getData('nfl', 'current', 'seasonal_games', 'json', {});
-	console.log(data);
-
-	/*console.log("get nfl stats NOW!")
-    var req = httpTransport.request(httpOptions, function(res) {
-
+	var req = http.request(options, function(res) {
         if (!res) { 
-            wikiData = "An error occured!";
+            return console.log("GET ACTUAL NFL WEEK: An error occured!");
         };
-
-        var body = '';
-        console.log("statusCode: ", res.statusCode);
+		var body = '';
+        console.log("GET ACTUAL NFL WEEK: statusCode: ", res.statusCode);
         res.setEncoding('utf8');
 
         res.on('data', function(data) {
@@ -522,22 +560,282 @@ function nfl_games() {
 			try {
 				wikiData = JSON.parse(body);
 			} catch(err) {
-				console.log(body);
-				return console.log("PARSING ERROR: \n" + err);
+				return console.log("GET ACTUAL NFL WEEK: PARSING ERROR: \n" + err);
 			}
-            
 			if(wikiData == undefined) {
-				return console.log("wikiData is undefined");
+				return console.log("GET ACTUAL NFL WEEK: wikiData is undefined");
 			}
-			//IF EVERYTHING WORKS OUT
-			console.log(wikiData.items[0]);
-        });
-    });
-
-    req.end();
+			
+			//YEAH, WE GOT SOME WIKIDATA, NOW IT BEGINS
+			var newWeek = wikiData;
+			db.collection('actWeek').find().toArray((err, data) => {
+				if (err) return console.log(err);
+				if(data[0].week == newWeek) {
+					return console.log("Week is still up to date, nothing todo!")
+				}
+				//NEW WEEK, change db and look up bets
+				console.log("Week changed!")
+				db.collection('actWeek').updateOne( //save actWeek to db
+					{ id: 'act_week' },
+					{ $set: { 'week': wikiData } }
+				);
+				getNewGames(newWeek);
+			});
+			//END
+		});
+	});
+	
+	req.end();
     req.on('error', function (err) {
-        wikiData = "API down?!?!";
-    })*/
+        console.log("GET ACTUAL NFL WEEK: " + err)
+    });
+}
+
+function getNewOdds(newWeek) {
+	console.log("GET NEW ODDS");
+	
+	axios.get('https://api.the-odds-api.com/v3/odds', {
+		params: {
+			api_key: 'd9d91acf0d74f53f5f71669cde4ff17c',
+			sport: 'americanfootball_nfl',
+			region: 'us', // uk | us | au
+			mkt: 'h2h' // h2h | spreads | totals
+		}
+	}).then(response => {
+		// Events are ordered by start time (live events are first)
+		console.log('Successfully got odds')
+		var wikiData = JSON.parse(JSON.stringify(response.data));
+		if(wikiData.success != true) {
+			return console.log("ODDS JSON Parsing failed!")
+		}
+		
+		//YEAH, WE GOT SOME WIKIDATA, NOW IT BEGINS
+		
+		
+		
+		//add odds to db
+		for(var i=0; i<wikiData.data.length; i++) {
+			var gameOdd = wikiData.data[i];
+			if(gameOdd.sites_count > 0) {
+				var homeTeam = gameOdd.home_team;
+				var awayTeam;
+				var homeId;
+				if(gameOdd.teams[0] == homeTeam) { //homeTeam is not always first element of array!!!!
+					homeId = 0;
+					awayTeam = gameOdd.teams[1];
+				} else {
+					homeId = 1;
+					awayTeam = gameOdd.teams[0];
+				}
+				var stringId = nflTeam_Map[homeTeam] + "_" + nflTeam_Map[awayTeam];
+				db.collection('games').updateOne( //save actWeek to db
+					{ id: stringId },
+					{ $set: { 'quoteHome': gameOdd.sites[0].odds.h2h[homeId], 'quoteAway': gameOdd.sites[0].odds.h2h[(1-homeId)] } }
+				);
+			}
+		}
+		setTimeout(refreshGamesDB, 1000*60); //refresh Array after one minute
+		//END
+	})
+	.catch(error => {
+		console.log('Error status', error.response.status);
+		console.log(error.response.data);
+		setTimeout(getNewOdds, 1000*60*10); //try again in 10minutes
+	})
+}
+
+function getNewGames(newWeek) {
+	console.log("GET NEW GAMES");
+	var pathActWeek = '/v3/nfl/scores/json/ScoresByWeek/2019/' + newWeek;
+
+	var wikiData; //JSON Data result
+	var options = {
+		hostname: 'api.sportsdata.io',
+		path: pathActWeek,
+		headers: {'Ocp-Apim-Subscription-Key': '5ddf733575c841fb85dae917a4b5fdd3'},
+		method: 'GET'
+	};
+	var req = http.request(options, function(res) {
+		if (!res) { 
+			return console.log("GET NFL GAMES: An error occured!");
+		};
+		var body = '';
+		console.log("GET NFL GAMES: statusCode: ", res.statusCode);
+		res.setEncoding('utf8');
+
+		res.on('data', function(data) {
+			body += data;
+		});
+
+		res.on('end', function() {
+			try {
+				wikiData = JSON.parse(body);
+			} catch(err) {
+				return console.log("GET NFL GAMES: PARSING ERROR: \n" + err);
+			}
+			if(wikiData == undefined) {
+				return console.log("GET NFL GAMES: wikiData is undefined");
+			}
+			
+			//YEAH, WE GOT SOME WIKIDATA, NOW IT BEGINS
+		
+			for(var i=0; i<wikiData.length; i++) {
+				var match = wikiData[i];
+				var matchId = match.HomeTeam + "_" + match.AwayTeam;
+				var gameData = {
+					id: matchId,
+					week: newWeek,
+					state: "NotStarted",
+					home: match.HomeTeam,
+					away: match.AwayTeam,
+					quoteHome: 0,
+					quoteAway: 0,
+					winner: "none"
+				}
+				game.create(gameData, function (error, g) {
+					if(error) {
+						return console.log(error);
+					}
+				});
+			}
+			setTimeout(getNewOdds, 1000*5, newWeek);
+			//END
+		});
+	});
+	
+	req.end();
+	req.on('error', function (err) {
+		console.log("GET NFL GAMES: " + err)
+		setTimeout(getNewGames, 1000*60*10, newWeek); //try again in 10minutes
+	});
+}
+
+function nfl_games() {
+	var hour = new Date().getHours();
+	if(hour < 16 && hour >= 6) {
+		return; //only needed at game time
+	}
+	console.log("GET NFL GAMES");
+	db.collection('actWeek').find().toArray((err, data) => {
+		if (err) return console.log(err);
+		var pathActWeek = '/v3/nfl/scores/json/ScoresByWeek/2019/' + data[0].week;
+	
+		var wikiData; //JSON Data result
+		var options = {
+			hostname: 'api.sportsdata.io',
+			path: pathActWeek,
+			headers: {'Ocp-Apim-Subscription-Key': '5ddf733575c841fb85dae917a4b5fdd3'},
+			method: 'GET'
+		};
+		var req = http.request(options, function(res) {
+			if (!res) { 
+				return console.log("GET NFL GAMES: An error occured!");
+			};
+			var body = '';
+			console.log("GET NFL GAMES: statusCode: ", res.statusCode);
+			res.setEncoding('utf8');
+
+			res.on('data', function(data) {
+				body += data;
+			});
+
+			res.on('end', function() {
+				try {
+					wikiData = JSON.parse(body);
+				} catch(err) {
+					return console.log("GET NFL GAMES: PARSING ERROR: \n" + err);
+				}
+				if(wikiData == undefined) {
+					return console.log("GET NFL GAMES: wikiData is undefined");
+				}
+				
+				//YEAH, WE GOT SOME WIKIDATA, NOW IT BEGINS
+				console.log(wikiData[0]);
+				console.log("NOW");
+				var matches = wikiData;
+				
+				db.collection('games').find(({week:newWeek}).toArray((err, games) => {
+				if (err) return console.log(err);
+				
+				db.collection('users').find().toArray((err, users) => {
+					if (err) return console.log(err);
+					//create userArray without passwords
+					userArray = new Array();
+					for(var i=0; i<users.length; i++) {
+						var person = {username:users[i].username, points:users[i].points, tipps:users[i].tipps};
+						userArray.push(person);
+					}
+					
+					
+					for(var i=0; i<matches.length; i++) {
+						if(matches[i].IsOver) { //is Game over?
+							var gameID = matches[i].HomeTeam + "_" + matches[i].AwayTeam;
+							for(var j=0; j<games.length; j++) {
+								if(games[j].id == gameID) {
+									if(games[j].state == "NotStarted" || games[j].state == "HasStarted") {
+										//scheduled changed to finished -> refresh and update points
+										//update games db
+										updateFinishedGame(gameID, matches[i].score.winner);
+										
+										//iterate users
+										for(var k=0; k<users.length; k++) {
+											if(users[k].tipps[gameID] != undefined) {
+												console.log("uh yeah theres a vote");
+												var reward = users[k].tipps[gameID].value;
+												console.log("reward_before:" + reward);
+												var vote = users[k].tipps[gameID].choice;
+												var quote = 0;
+												console.log("vote: " + vote);
+												console.log("winner: " + matches[i].score.winner);
+												if(vote == 0 && matches[i].score.winner == "HOME_TEAM") {
+													quote = games[j].quoteHome;
+												} else if(vote == 1 && (matches[i].score.winner == "DRAW" || matches[i].score.duration != "REGULAR")) {
+													quote = games[j].quoteDraw;
+												} else if(vote == 2 && matches[i].score.winner == "AWAY_TEAM") {
+													quote = games[j].quoteAway;
+													console.log("reward_after:" + reward);
+												}
+												reward = reward * quote;
+												reward = Math.ceil(reward)
+												console.log("reward_now:" + reward);
+												
+												//update users db
+												changeUserPoints(users[k].username, reward);
+											}
+										}
+									}
+								}
+							}
+						} else if(matches[i].HasStarted) { //has game started?
+							var gameID = matches[i].homeTeam.name + "_" + matches[i].awayTeam.name;
+							for(var j=0; j<games.length; j++) {
+								if(games[j].id == gameID) {
+									if(games[j].state == "SCHEDULED") {
+										//scheduled changed to IN_PLAY -> refresh db games
+										game.findOne({id: games[j].id}, function (err, match) {
+											match.state = "IN_PLAY";
+											match.save(function (err) {
+												if(err) {
+													console.error('ERROR!');
+												}
+											});
+										});
+									}
+								}
+							}
+						}
+					}
+				});
+			});
+				//END
+			});
+		});
+		
+		req.end();
+		req.on('error', function (err) {
+			console.log("GET NFL GAMES: " + err)
+		});
+	});
 }
 
 function wm_games() {
@@ -669,7 +967,7 @@ function changeUserPoints(name, reward) {
 	User.findOne({username: name}, function (err, user) {
 		console.log("points_before:" + user.points);
 		user.points = parseInt(user.points) + reward,
-		user.password = user.passwordConf,
+		user.password = user.passwordConf, //TODO may we need password back, or other solution
 		console.log("points_now:" + user.points);
 		user.save(function (err) {
 			if(err) {

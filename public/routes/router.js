@@ -25,11 +25,9 @@ router.post('/', function (req, res, next) {
     var userData = {
       username: req.body.username,
       password: req.body.password,
-      passwordConf: req.body.passwordConf,
 	  points: 10000,
 	  tipps: new Map(),
     }
-
     User.create(userData, function (error, user) {
       if (error) {
         return next(error);
@@ -42,6 +40,7 @@ router.post('/', function (req, res, next) {
   } else if (req.body.logusername && req.body.logpassword) {
     User.authenticate(req.body.logusername, req.body.logpassword, function (error, user) {
       if (error || !user) {
+		console.log("yyeed");
         var err = new Error('Wrong username or password.');
         err.status = 401;
         return next(err);

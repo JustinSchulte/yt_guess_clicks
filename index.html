@@ -49,7 +49,7 @@
 			<br>
 			<button class="button" id="memes">Memes</button>
 			<br>
-			<button class="button" id="wm">WM-Tippspiel</button>
+			<button class="button" id="nfl">NFL-Tippspiel</button>
 			<br>
 			<button class="button" id="chess">AutoChess</button>
 		</div>
@@ -114,13 +114,13 @@
 							break;
 					}
 				});
-				$("#wm").on('click auxclick contextmenu', function(e) {
+				$("#nfl").on('click auxclick contextmenu', function(e) {
 					switch(e.which) {
 						case 1:
-							window.location = "/wm";
+							window.location = "/nfl";
 							break;
 						case 2:
-							window.open("/wm");
+							window.open("/nfl");
 							break;
 						case 3:
 							break;
