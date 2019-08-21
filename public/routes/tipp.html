@@ -45,30 +45,42 @@
 		font-size:24px;
 		padding:5px;
 		border-radius: 6px;
-		width: 200px;
+		width: 280px;
 		display: inline-block;
-		border: 2px solid #4CAF50;
+		border: 2px solid #2F4858;
 	  }
 	  .btn-group input[type="number"] {
 		font-size:24px;
 		padding:5px;
 		border-radius: 6px;
-		border: 2px solid #4CAF50;
+		border: 2px solid #2F4858;
 		width: 100px;
 	  }
 	  .btn-group input[type="radio"]:checked+label{
 		color: white;
-		background-color: #4CAF50;
+		background-color: #C6A143;
 	  }
 	  .btn-group input[type="submit"] {
 	    font-size:24px;
 		padding:5px;
 		border-radius: 6px;
-		border: 2px solid #008CBA; 
+		border: 2px solid #4EA699; 
 		width: 100px;
 	  }
 	  .btn-group input[type="submit"]:hover:enabled {
-		background-color: #008CBA; 
+		background-color: #4EA699; 
+		color:white; 
+		cursor:pointer;
+	  }
+	  .button {
+	    font-size:24px;
+		padding:5px;
+		border-radius: 6px;
+		border: 2px solid #4EA699; 
+		width: 140px;
+	  }
+	  .button:hover:enabled {
+		background-color: #4EA699; 
 		color:white; 
 		cursor:pointer;
 	  }
@@ -83,10 +95,11 @@
 		<div id="contentWrapper">
 			<div class="backgroundTop" style="font-size:24px; padding:5px">
 				<a href="/" style="text-decoration: none; margin-right: 20px;">
-					<img id="icon" src="/images/teewurst_icon_white.ico" alt="Icon" style="width:32px;height:32px;">
+					<img id="icon" src="/images/fertig_white.svg" alt="Icon" style="width:32px;height:32px;">
 				</a>
-				<span style="color:white;font-size:24px">Tippspiel</span>
-				<label style="color:white;font-size:20px;margin-left: 100px;" id="pointView">Chips:</label>
+				<span style="color:white;font-size:24px">NFL-Tippspiel</span>
+				<label style="color:white;font-size:24px;margin-left: 100px;background-color: black;border-radius: 6px;border: 2px solid #2F4858;padding:5px;" id="pointView">Chips:</label>
+				<button class="button" id="saveAll" style="margin-left: 50px;">SAVE ALL</button>
 			</div>
 			<div class="flex-container">
 				<div class="backgroundMain">
@@ -102,9 +115,14 @@
 	<script> 
 		var myID = "";
 		var myChips = 0;
+		var allMyChips = 0;
+		var mapAll;
 		var map;
 		var matches;
 		var users;
+		var actWeek;
+		
+		var newTippsArray = [];
 	
 		const getCookie = (name) => {
 		  const value = "; " + document.cookie;
@@ -125,38 +143,20 @@
 		  let dataCookie = getCookie('data');
 		  deleteCookie('data');
 		  
-		  //TODO add all matches
-		  var content = '';
-		  var currentId = 12;
-		  var homeTeam = 'Hannover';
-		  var awayTeam = 'NewYork';
-		  var homeChance = '0,1';
-		  var awayChance = '2,3';
-		  content += '<div class="tipp-form"><form id="France_Croatia"><div class="btn-group">'
-		  content += '<input type="radio" id="radio1_' + currentId + '" name="radios" value="0"><label for="radio1_' + currentId + '">' + homeTeam + '<br><font size="6">' + homeChance + '</font></label>'
-		  content += '<input type="radio" id="radio2_' + currentId + '" name="radios" value="1"><label for="radio2_' + currentId + '">' + awayTeam + '<br><font size="6">' + awayChance + '</font></label>'
-		  content += '<input type="number" name="pointInput" placeholder="0"><input type="submit" value="SAVE"></div></form></div>'
-		  $('#votes').html(content);
-		  
-
 		  if (dataCookie) {
 			const data = parseObjectFromCookie(dataCookie);
 			//data is all data from logged in user
-			//console.log(data);
 			myID = data["username"];
 			myChips = data["points"];
-			$('#pointView').text("Chips: " + myChips);
-			map = data["tipps"];
-			for (var key in map) {
-				var value = map[key];
-				//console.log(key + ": " + value.value + ", " + value.choice);
-				$('#'+key).find('input[name="pointInput"]').val(value.value);
-				$('#'+key).find('input[name=radios][value='+value.choice+']').prop("checked", true);
-			}
+			allMyChips = data["allpoints"];
+			$('#pointView').text("Chips: " + myChips + " (" + allMyChips + ")");
 			
+			mapAll = data["tipps"];
 			//first loadMatches
 			getMatches();
 			setInterval(getMatches, 120000);
+			
+			
 			
 		  } else {
 			// handle data not found
@@ -170,17 +170,48 @@
 			  throw new Error('Request failed.');
 			})
 			.then(function(data) {
-				//check games if already playing or ...
 				matches = data.games;
 				users = data.users;
 				
+				//set actWeek
+				actWeek = matches[0].week;
+				
+				//add Matches
+				var content = '';
 				for(var i=0; i<matches.length; i++) {
-					if(matches[i].state == "SCHEDULED") {
-						console.log(matches[i].id);
+					var currentId = matches[i].id;
+					var homeTeam = matches[i].homeFullName;
+					var awayTeam = matches[i].awayFullName;
+					var homeChance = matches[i].quoteHome;
+					var awayChance = matches[i].quoteAway;
+					content += '<div class="tipp-form"><form id=' + currentId + ' onsubmit="submitBet(this); return false"><div class="btn-group">'
+					content += '<input type="radio" id="radio1_' + currentId + '" name="radios" value="0" disabled><label for="radio1_' + currentId + '">' + homeTeam + '<br><font size="6">' + homeChance + '</font></label>'
+					content += '<input type="radio" id="radio2_' + currentId + '" name="radios" value="1" disabled><label for="radio2_' + currentId + '">' + awayTeam + '<br><font size="6">' + awayChance + '</font></label>'
+					content += '<input type="number" name="pointInput" placeholder="0" disabled><input type="submit" value="SAVE" disabled></div></form></div>'
+					
+				}
+				$('#votes').html(content);
+				
+				//add own tipps
+				map = mapAll[actWeek]; //change to actWeek
+				if(map == undefined) map = {};
+				for (var key in map) {
+					var value = map[key];
+					console.log(key + ": " + value.value + ", " + value.choice);
+					$('#'+key).find('input[name="pointInput"]').val(value.value);
+					$('#'+key).find('input[name=radios][value='+value.choice+']').prop("checked", true);
+				}
+				
+				//check games if already playing or ...
+				for(var i=0; i<matches.length; i++) {
+					//console.log(matches[i].id + ": " + matches[i].state);
+					if(matches[i].state == "NotStarted") {
 						$('#' + matches[i].id).find('input[name="pointInput"]').prop("disabled",false);
 						$('#' + matches[i].id).find('input[type="submit"]').prop("disabled",false);
 						$('#' + matches[i].id).find('input[name=radios]').prop("disabled",false);
-					} else if(matches[i].state == "FINISHED") {
+					} else if(matches[i].state == "IsOver") {
+						//hide save button
+						$('#' + matches[i].id).find('input[type="submit"]').hide();
 						//set wrong voted games red
 						var helpVote = map[matches[i].id];
 						if(helpVote != undefined) {
@@ -191,16 +222,19 @@
 							//TODO vote == 0 or 1(away team), no more draw
 							if(vote == 0 && matches[i].winner == "HOME_TEAM") {
 								correct = true;
-							} else if(vote == 1 && (matches[i].winner == "DRAW" || !matches[i].regular)) {
-								correct = true;
-							} else if(vote == 2 && matches[i].winner == "AWAY_TEAM") {
+							} else if(vote == 1 && matches[i].winner == "AWAY_TEAM") {
 								correct = true;
 							}
 							console.log("correct: " + correct);
+							
 							if(!correct) {
 								//set red color
 								var forWhat = $('#' + matches[i].id).find('input[name=radios]:checked').attr('id');
-								$('#' + matches[i].id).find('label[for="' + forWhat + '"]').css("background-color", "red");
+								$('#' + matches[i].id).find('label[for="' + forWhat + '"]').css("background-color", "#84191C");
+							} else {
+								//set green color
+								var forWhat = $('#' + matches[i].id).find('input[name=radios]:checked').attr('id');
+								$('#' + matches[i].id).find('label[for="' + forWhat + '"]').css("background-color", "#12BC4E");
 							}
 						}
 					}
@@ -212,7 +246,7 @@
 				for(var i=0; i<users.length; i++) {
 					var username = users[i].username;
 					var points = users[i].points;
-					content += '<tr><td>' + username + "</td><td>" + points + '</td></tr>';
+					content += "<tr><td>" + username + "</td><td>" + points + " (" + users[i].allpoints + ")</td></tr>";
 
 				}
 				content += "</table>"
@@ -223,57 +257,70 @@
 			});
 		}
 		
-		$(function() {
-			//save new Chip-Value to DB and local map
-			$('form').submit(function() {
-				var gameID = $(this).closest("form[id]").attr('id');
-				console.log("form id: " + gameID);
-
-				var chips = $('#'+gameID).find('input[name="pointInput"]').val();
-				var checkedValue = $('#'+gameID).find('input[name=radios]:checked').val();
-				if(checkedValue == undefined) {
-					//stop if no team selected
-					alert("You have to select a team!");
+		function submitBet(form) {
+			var gameID = $(form).closest("form[id]").attr('id');
+			changeGameBet(gameID, false);
+		}
+		
+		function changeGameBet(gameID, saveAllInduced) {
+			var chips = $('#'+gameID).find('input[name="pointInput"]').val();
+			var checkedValue = $('#'+gameID).find('input[name=radios]:checked').val();
+			
+			//CHECK IF BET REGULAR
+			if(checkedValue == undefined) {
+				//stop if no team selected
+				if(!saveAllInduced) alert("You have to select a team!");
+				console.log(gameID + ": no team selected");
+				return false;
+			}
+			if(chips == undefined) {
+				//stop if no chips bet
+				if(!saveAllInduced) alert("You have to select a team!");
+				console.log(gameID + ": undefinded chips");
+				return false;
+			}
+			if(map[gameID] != undefined) {
+				var old = map[gameID].value;
+				var diffToOld = chips-old;
+				if(diffToOld == 0 && map[gameID].choice == checkedValue) return console.log(gameID + ": bet didnt changed"); //bet didnt change
+				if(diffToOld > myChips) {
+					//stop if not enough chips
+					alert("You dont have that much chips!");
 					return false;
 				}
-				if(chips == undefined) {
-					//stop if no chips bet
-					alert("You have to select a team!");
+				map[gameID].value = chips;
+				map[gameID].choice = checkedValue;
+				myChips = myChips - diffToOld;
+			} else {
+				var diffToOld = chips;
+				if(diffToOld > myChips) {
+					//stop if not enough chips
+					alert("You dont have that much chips!");
 					return false;
 				}
-				if(map[gameID] != undefined) {
-					var old = map[gameID].value;
-					var diffToOld = chips-old;
-					if(diffToOld > myChips) {
-						//stop if not enough chips
-						alert("You dont have that much chips!");
-						return false;
-					}
-					map[gameID].value = chips;
-					map[gameID].choice = checkedValue;
-					myChips = myChips - diffToOld;
-				} else {
-					var diffToOld = chips;
-					if(diffToOld > myChips) {
-						//stop if not enough chips
-						alert("You dont have that much chips!");
-						return false;
-					}
-					map[gameID] = {"value": +chips, "choice": +checkedValue};
-					myChips = myChips - diffToOld;
+				map[gameID] = {"value": +chips, "choice": +checkedValue};
+				myChips = myChips - diffToOld;
+			}
+			//BET PASSED
+			console.log(gameID + ": bet changed!");
+			
+			//disable buttons for 5seconds
+			for(var i=0; i<matches.length; i++) {
+				if(matches[i].state == "NotStarted") {
+					$('#' + matches[i].id).find('input[type="submit"]').prop("disabled",true);
 				}
-				//disable buttons for 5seconds
-				for(var i=0; i<matches.length; i++) {
-					if(matches[i].state == "SCHEDULED") {
-						$('#' + matches[i].id).find('input[type="submit"]').prop("disabled",true);
-					}
-				}
-				$('#pointView').text("Chips: " + myChips);						
-				
+			}
+			$("#saveAll").prop("disabled",true);
+			$('#pointView').text("Chips: " + myChips + " (" + allMyChips + ")");
+			
+			
+			if(saveAllInduced) {
+				newTippsArray.push({myID, chips, checkedValue, gameID, diffToOld});
+			} else {
 				$.ajax({
 					type: 'POST',
-					url: '/clicked',
-					data: {myID, chips, checkedValue, gameID, diffToOld}
+					url: '/save',
+					data: {myID, chips, checkedValue, gameID, diffToOld, actWeek}
 				});
 				
 				//enable buttons after 5seconds, show countdown
@@ -281,24 +328,65 @@
 				var interval = setInterval(function(){
 					if(count == 0) {
 						for(var i=0; i<matches.length; i++) {
-							if(matches[i].state == "SCHEDULED") {
+							if(matches[i].state == "NotStarted") {
 								$('#' + matches[i].id).find('input[type="submit"]').prop("disabled",false);
 								$('#' + matches[i].id).find('input[type="submit"]').prop('value', 'SAVE');
 							}
 						}
+						$("#saveAll").prop("disabled",false);
+						$("#saveAll").prop('value', 'SAVE');
 						clearInterval(interval);
 					} else {
 						for(var i=0; i<matches.length; i++) {
-							if(matches[i].state == "SCHEDULED") {
+							if(matches[i].state == "NotStarted") {
 								$('#' + matches[i].id).find('input[type="submit"]').prop('value', count);
 							}
 						}
 					}
 					count--;
 				},1000);
+			}
+		}
+		
+		$(function() {
+			$("#saveAll").click(function() {
+				newTippsArray = [];
+				for(var i=0; i<matches.length; i++) {
+					var gameID = matches[i].id;
+					changeGameBet(gameID, true);
+				}
+				if(newTippsArray.length == 0) return;
+
+				$.ajax({
+					type: 'POST',
+					url: '/saveall',
+					data: { array: JSON.stringify(newTippsArray), actWeek},
+					dataType: "json"
+				});
 				
-				return false;
-			}); 
+				//enable buttons after 5seconds, show countdown
+				var count = 4;
+				var interval = setInterval(function(){
+					if(count == 0) {
+						for(var i=0; i<matches.length; i++) {
+							if(matches[i].state == "NotStarted") {
+								$('#' + matches[i].id).find('input[type="submit"]').prop("disabled",false);
+								$('#' + matches[i].id).find('input[type="submit"]').prop('value', 'SAVE');
+							}
+						}
+						$("#saveAll").prop("disabled",false);
+						$("#saveAll").prop('value', 'SAVE');
+						clearInterval(interval);
+					} else {
+						for(var i=0; i<matches.length; i++) {
+							if(matches[i].state == "NotStarted") {
+								$('#' + matches[i].id).find('input[type="submit"]').prop('value', count);
+							}
+						}
+					}
+					count--;
+				},1000);
+			});	
 		})
 	</script>
   </body>

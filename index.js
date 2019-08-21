@@ -5,7 +5,11 @@ var portt = "3000";
 //API KEYS
 var apiKey_random = "";
 var apiKey_google = "";
+var apiKey_nfl = "";
+var apiKey_odds = "";
 
+//FOR RANDOM YOUTUBE
+var youtube = require('youtube-random-video');
 
 var app = require('express')();
 var http = require('http');
@@ -76,8 +80,7 @@ var nflTeam_Map = {
 	"Oakland Raiders": "OAK"
 };
 
-
-
+//yt clicks stuff
 var wm = new WeakMap();
 var wm_names = new WeakMap();
 var wm_points = new WeakMap();
@@ -87,7 +90,6 @@ var multipl = 1;
 
 var startingConntectedPlayers = 0;
 var wm_startingPlayer = new WeakMap();
-
 var wm_fish = new WeakMap();
 
 var haken = " <span style=\"color:#0f0;font-size:30px;\">&check;</span>";
@@ -124,19 +126,34 @@ app.get('/autochess', function(req, res){
 
 app.use(express.static(path.join(__dirname, 'public')));
 var favicon = require('serve-favicon');
-app.use(favicon(__dirname + '/public/images/teewurst_icon.ico'));
+app.use(favicon(__dirname + '/public/images/white512.png'));
 
-//NEW
+
 //connect to MongoDB
 var uri = 'mongodb://schokokroko:toastbrot5@cluster0-shard-00-00-cibks.mongodb.net:27017,cluster0-shard-00-01-cibks.mongodb.net:27017,cluster0-shard-00-02-cibks.mongodb.net:27017/nfl2019?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true&w=majority';
-mongoose.connect(uri);// + "/wm_game");
+mongoose.connect(uri);
 var db = mongoose.connection;
 //handle mongo error
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function () {
 	console.log("connected");
-  // we're connected!
+	//get API Keys
+	db.collection('apiKeys').find().toArray((err, keys) => {
+		if (err) return console.log(err);
+		for(var i=0; i<keys.length; i++) {
+			switch(keys[i].id) {
+				case "randomYT": apiKey_random = keys[i].key; break;
+				case "google": apiKey_google = keys[i].key; break;
+				case "nfl": apiKey_nfl = keys[i].key; break;
+				case "odds": apiKey_odds = keys[i].key; break;
+			}
+		}
+	});
+	
+	//AT START
+	getFrequentNFLStats();
 });
+
 //use sessions for tracking logins
 app.use(session({
   secret: 'work hard',
@@ -154,21 +171,22 @@ var routes = require('./public/routes/router');
 app.use('/', routes);
 
 //get refreshed through every 2min API call
+//for nfl_betting -> for table
 var gameArray; 
 var userArray;
-app.get('/clicks', (req, res) => { //TODO fill arrays as in wmGames
+app.get('/clicks', (req, res) => {
 	result = {"games":gameArray, "users":userArray};
 	res.send(result);
 });
 
+app.post('/saveAll', (req, res) => {
+	var newTippsArray = req.body.data;
+console.log(newTippsArray[0].myID);});
 
-//AT START
-getFrequentNFLStats();
-
+//YT GAME START
 io.on('connection', function(socket){
 	//INIT IF CONNECTED
-	//socket.emit('setIPPORT', ip, portt); //NOT NECESSARY?!?!
-	console.log("testConnect");
+	console.log("someone connected!");
 	
 	//memes
 	socket.on('memes', function(){
@@ -262,10 +280,14 @@ io.on('connection', function(socket){
 		var request = require('request');
 		var random_api_url = "http://randomyoutube.net/api/getvid?api_token=" + apiKey_random;
 		console.log(random_api_url);
-		request(random_api_url, function (error, response, body) {
-			if (!error && response.statusCode == 200) {
-				var importedJSON = JSON.parse(body);
-				vid = importedJSON.vid;
+		youtube.getRandomVid(apiKey_google, function(err , data){
+			if (!err) {
+				var importedJSON = data;
+				if(importedJSON == undefined) {
+					return console.log("GET random_api: importedJSON is undefined");
+				}
+				
+				vid = importedJSON.id.videoId;
 				if (typeof vid === "undefined") {
 					console.log("undefined VID");
 					io.emit('actNextB'); //ak nextButton
@@ -280,7 +302,15 @@ io.on('connection', function(socket){
 				console.log(google_api_url);
 				request(google_api_url, function (error, response, body) {
 					if (!error && response.statusCode == 200) {
-						var importedJSON = JSON.parse(body);
+						var importedJSON;
+						try {
+							importedJSON = JSON.parse(body);
+						} catch(err) {
+							return console.log("GET google_api: PARSING ERROR: \n" + err);
+						}
+						if(importedJSON == undefined) {
+							return console.log("GET google_api: importedJSON is undefined");
+						}
 						console.log(JSON.stringify(importedJSON));
 						if (typeof JSON.stringify(importedJSON.items[0]) === "undefined") {
 							console.log("undefined clicks");
@@ -320,7 +350,7 @@ io.on('connection', function(socket){
 				});
 			}
 			else {
-				console.log("error?!?!?!");
+				console.log("error getting random video");
 			}
 		});
 	});
@@ -506,20 +536,19 @@ function getFrequentSoccerStats() {
 	setTimeout(wm_games, 1000*5);
 	setInterval(wm_games, 1000*120);
 }
+//YT GAME END
 
 
-
+//NFL START
 function getFrequentNFLStats() {
 	console.log("get nfl stats soon");
-	//refreshUserDB(); //once at start
+	refreshUserDB(); //once at start
 	
-	setTimeout(nfl_actMatchday, 1000*5);
-	//setInterval(nfl_actMatchday, 1000*60*60*12); //twice each day
-	//setTimeout(getNewGames, 1000*5, 1); //TODO delete
-	//setTimeout(nfl_games, 1000*10);
-	//setInterval(nfl_games, 1000*60*60*24); //each 30minutes
-	
-	//setInterval(refreshUserDB, 1000*60*5); //each 5minutes
+	setTimeout(nfl_actMatchday, 1000*1);
+	setInterval(nfl_actMatchday, 1000*60*60*12); //twice each day
+	setTimeout(nfl_games, 1000*180);
+	setInterval(nfl_games, 1000*60*60*24); //each 30minutes
+	setInterval(refreshUserDB, 1000*60*5); //each 5minutes
 }
 
 function refreshUserDB() {
@@ -574,8 +603,7 @@ function nfl_actMatchday() {
 			var newWeek = wikiData;
 			newWeek = 1; //TODO delete
 			actWeek = newWeek;
-			refreshGamesDB(); //once at start
-			refreshUserDB();
+			refreshGamesDB(); //once at start (need actWeek)
 			
 			db.collection('actWeek').find().toArray((err, data) => {
 				if (err) return console.log(err);
@@ -586,8 +614,14 @@ function nfl_actMatchday() {
 				console.log("Week changed!")
 				db.collection('actWeek').updateOne( //save actWeek to db
 					{ id: 'act_week' },
-					{ $set: { 'week': wikiData } }
+					{ $set: { 'week': newWeek } }
 				);
+				db.collection('users').find().toArray((err, users) => {
+					for(var i=0; i<users.length; i++) {
+						addPointHistory(users[i].username);
+					}
+					return;
+				});
 				getNewGames();
 			});
 			//END
@@ -637,7 +671,7 @@ function getNewOdds() {
 				var stringId = nflTeam_Map[homeTeam] + "_" + nflTeam_Map[awayTeam];
 				db.collection('games').updateOne( //save actWeek to db
 					{ id: stringId },
-					{ $set: { 'quoteHome': gameOdd.sites[0].odds.h2h[homeId], 'quoteAway': gameOdd.sites[0].odds.h2h[(1-homeId)] } }
+					{ $set: { 'quoteHome': gameOdd.sites[0].odds.h2h[homeId], 'quoteAway': gameOdd.sites[0].odds.h2h[(1-homeId)], 'homeFullName': homeTeam, 'awayFullName': awayTeam} }
 				);
 			}
 		}
@@ -695,6 +729,8 @@ function getNewGames() {
 					state: "NotStarted",
 					home: match.HomeTeam,
 					away: match.AwayTeam,
+					homeFullName : "",
+					awayFullName : "",
 					quoteHome: 0,
 					quoteAway: 0,
 					winner: "none"
@@ -719,9 +755,9 @@ function getNewGames() {
 
 function nfl_games() {
 	var hour = new Date().getHours();
-	if(hour < 16 && hour >= 6) {
-		return; //only needed at game time
-	}
+	/*if(hour < 16 && hour >= 6) {
+		return; //only needed at game time -> fewer api calls
+	}*/
 	console.log("GET NFL GAMES");
 	db.collection('actWeek').find().toArray((err, data) => {
 		if (err) return console.log(err);
@@ -757,8 +793,7 @@ function nfl_games() {
 				}
 				
 				//YEAH, WE GOT SOME WIKIDATA, NOW IT BEGINS
-				console.log(wikiData[0]);
-				console.log("NOW");
+				console.log("compare nfl-data and user-tipps...");
 				var matches = wikiData;
 				
 				db.collection('games').find({week:actWeek}).toArray((err, games) => {
@@ -766,47 +801,43 @@ function nfl_games() {
 				
 					db.collection('users').find().toArray((err, users) => {
 						if (err) return console.log(err);
-						//create userArray without passwords
-						userArray = new Array();
-						for(var i=0; i<users.length; i++) {
-							var person = {username:users[i].username, points:users[i].points, tipps:users[i].tipps};
-							userArray.push(person);
-						}
 						
 						for(var i=0; i<matches.length; i++) {
+							var gameID = matches[i].HomeTeam + "_" + matches[i].AwayTeam;
 							if(matches[i].IsOver) { //is Game over?
-								var gameID = matches[i].HomeTeam + "_" + matches[i].AwayTeam;
 								for(var j=0; j<games.length; j++) {
 									if(games[j].id == gameID) {
 										if(games[j].state == "NotStarted" || games[j].state == "HasStarted") {
 											//scheduled changed to finished -> refresh and update points
 											//update games db
-											updateFinishedGame(gameID, matches[i].score.winner);
+											var winner = "HOME_TEAM";
+											if(matches[i].HomeScore<matches[i].AwayScore) {
+												winner = "AWAY_TEAM";
+											}
+											updateFinishedGame(gameID, winner);
 											
 											//iterate users
 											for(var k=0; k<users.length; k++) {
-												if(users[k].tipps[gameID] != undefined) {
+												if(users[k].tipps[actWeek][gameID] != undefined) {
 													console.log("uh yeah theres a vote");
-													var reward = users[k].tipps[gameID].value;
-													console.log("reward_before:" + reward);
-													var vote = users[k].tipps[gameID].choice;
+													var stake = users[k].tipps[actWeek][gameID].value;
+													console.log("reward_before:" + stake);
+													var vote = users[k].tipps[actWeek][gameID].choice;
 													var quote = 0;
 													console.log("vote: " + vote);
-													console.log("winner: " + matches[i].score.winner);
-													if(vote == 0 && matches[i].score.winner == "HOME_TEAM") {
+													console.log("winner: " + winner);
+													if(vote == 0 && winner == "HOME_TEAM") {
 														quote = games[j].quoteHome;
-													} else if(vote == 1 && (matches[i].score.winner == "DRAW" || matches[i].score.duration != "REGULAR")) {
-														quote = games[j].quoteDraw;
-													} else if(vote == 2 && matches[i].score.winner == "AWAY_TEAM") {
+													} else if(vote == 1 && winner == "AWAY_TEAM") {
 														quote = games[j].quoteAway;
-														console.log("reward_after:" + reward);
+														console.log("reward_after:" + stake);
 													}
-													reward = reward * quote;
+													var reward = stake * quote;
 													reward = Math.ceil(reward)
 													console.log("reward_now:" + reward);
 													
 													//update users db
-													changeUserPoints(users[k].username, reward);
+													changeUserPoints(users[k].username, reward, stake);
 												}
 											}
 										}
@@ -816,7 +847,7 @@ function nfl_games() {
 								var gameID = matches[i].homeTeam.name + "_" + matches[i].awayTeam.name;
 								for(var j=0; j<games.length; j++) {
 									if(games[j].id == gameID) {
-										if(games[j].state == "SCHEDULED") {
+										if(games[j].state == "NotStarted") {
 											//scheduled changed to IN_PLAY -> refresh db games
 											game.findOne({id: games[j].id}, function (err, match) {
 												match.state = "IN_PLAY";
@@ -830,7 +861,9 @@ function nfl_games() {
 									}
 								}
 							}
+							
 						}
+						setTimeout(refreshGamesDB, 1000*5);
 					});
 				});
 				//END
@@ -969,11 +1002,23 @@ function wm_games() {
 	
 }
 
-function changeUserPoints(name, reward) {
+function addPointHistory(name) {
+	User.findOne({username: name}, function (err, user) {
+		var pointhistory = user.pointhistory;
+		pointhistory.set((actWeek-1).toString(), user.points);
+		user.save(function (err) {
+			if(err) {
+				console.error('ERROR!');
+			}
+		});
+	});
+}
+
+function changeUserPoints(name, reward, stake) {
 	User.findOne({username: name}, function (err, user) {
 		console.log("points_before:" + user.points);
 		user.points = parseInt(user.points) + reward,
-		user.password = user.passwordConf, //TODO may we need password back, or other solution
+		user.allpoints = parseInt(user.allpoints) + reward - stake;
 		console.log("points_now:" + user.points);
 		user.save(function (err) {
 			if(err) {
@@ -985,7 +1030,7 @@ function changeUserPoints(name, reward) {
 
 function updateFinishedGame(game_id, winner, regular) {
 	game.findOne({id: game_id}, function (err, match) {
-		match.state = "FINISHED";
+		match.state = "IsOver";
 		match.winner = winner;
 		match.regular = regular;
 		match.save(function (err) {

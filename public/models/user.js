@@ -16,6 +16,14 @@ var UserSchema = new mongoose.Schema({
 	type: Number,
 	required: true,
   },
+  allpoints: {
+	type: Number,
+	required: true,
+  },
+  pointhistory: {
+	type: Map,
+	required: true,
+  },
   tipps: {
 	type: Map,
 	required: true,
@@ -44,10 +52,12 @@ UserSchema.statics.authenticate = function (username, password, callback) {
 }
 
 //hashing a password before saving it to the database
-//TODO need to test bycryptjs!
 UserSchema.pre('save', function (next) {
   var user = this;
-  console.log("now!");
+  
+  // only hash the password if it has been modified (or is new)
+  if (!user.isModified('password')) return next();
+  
   bcrypt.hash(user.password, 10, function (err, hash) {
     if (err) {
       return next(err);

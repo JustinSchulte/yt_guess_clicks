@@ -26,6 +26,8 @@ router.post('/', function (req, res, next) {
       username: req.body.username,
       password: req.body.password,
 	  points: 10000,
+	  allpoints: 10000,
+	  pointhistory: {0: 10000},
 	  tipps: new Map(),
     }
     User.create(userData, function (error, user) {
@@ -40,7 +42,6 @@ router.post('/', function (req, res, next) {
   } else if (req.body.logusername && req.body.logpassword) {
     User.authenticate(req.body.logusername, req.body.logpassword, function (error, user) {
       if (error || !user) {
-		console.log("yyeed");
         var err = new Error('Wrong username or password.');
         err.status = 401;
         return next(err);
@@ -68,7 +69,7 @@ router.get('/tipp', function (req, res, next) {
           err.status = 400;
           return next(err);
         } else {
-			 console.log(user.username);
+			 console.log(user.username + " logged in");
 			 res.sendFile(path.join(__dirname + '/tipp.html'));
 			 res.cookie('data', JSON.stringify(user));
         }
@@ -90,25 +91,27 @@ router.get('/logout', function (req, res, next) {
   }
 });
 
-router.post('/clicked', (req, res) => {
+router.post('/save', (req, res) => {
+	var actWeek = req.body.actWeek;
+	console.log(actWeek);
 	var oldUsername = req.body.myID;
 	var value = req.body.chips;
 	var choice = req.body.checkedValue;
 	var gameID = req.body.gameID;
 	var diffToOld = req.body.diffToOld;
-	var tipps = new Map();
 	
 	console.log(oldUsername + ", " + value + ", " + choice + ", " + gameID);
+	
 	User.findOne({username: oldUsername}, function (err, user) {
-		user.points = (parseInt(user.points) - parseInt(diffToOld)),
-		user.password = user.passwordConf,
-		tipps = user.tipps,
-		tipps.set(gameID, {"value": +value, "choice": +choice}),
+		user.points = (parseInt(user.points) - parseInt(diffToOld));
+		var allTipps = user.tipps;
+		var tipps = allTipps.get(actWeek);
+		if(tipps == undefined) tipps = {};
+		tipps[gameID] = {"value": +value, "choice": +choice};
+		user.tipps.set(actWeek, tipps);
 		console.log(tipps);
 		
-
 		user.save(function (err) {
-			console.log(user.password);
 			if(err) {
 				console.error('ERROR!');
 			}
@@ -116,5 +119,38 @@ router.post('/clicked', (req, res) => {
 	});
 });
 
+router.post('/saveall', (req, res) => {
+	var actWeek = req.body.actWeek;
+	console.log(actWeek);
+	var data = JSON.parse(req.body.array);
+	console.log("id: " + data[0].myID);
+	
+	var oldUsername = data[0].myID;
+	//sum diffToOld
+	var diffToOld = 0;
+	for(var i=0; i<data.length; i++) {
+		diffToOld += parseInt(data[i].diffToOld);
+	}
+	console.log("diff: " + diffToOld);
+	
+	User.findOne({username: oldUsername}, function (err, user) {
+		user.points = (parseInt(user.points) - parseInt(diffToOld));
+		var allTipps = user.tipps;
+		var tipps = allTipps.get(actWeek);
+		if(tipps == undefined) tipps = {};
+		for(var i=0; i<data.length; i++) {
+			tipps[data[i].gameID] = {"value": +data[i].chips, "choice": +data[i].checkedValue};
+		}
+		user.tipps.set(actWeek, tipps);
+		console.log(tipps);
+
+		user.save(function (err) {
+			if(err) {
+				console.error('ERROR!');
+			}
+		});
+	});
+	res.end();
+});
 
 module.exports = router;
