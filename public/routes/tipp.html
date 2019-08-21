@@ -117,7 +117,7 @@
 		var myChips = 0;
 		var allMyChips = 0;
 		var mapAll;
-		var map;
+		//var map;
 		var matches;
 		var users;
 		var actWeek;
@@ -143,8 +143,9 @@
 		  let dataCookie = getCookie('data');
 		  deleteCookie('data');
 		  
-		  if (dataCookie) {
+		  if(dataCookie) {
 			const data = parseObjectFromCookie(dataCookie);
+			dataCookie = false;
 			//data is all data from logged in user
 			myID = data["username"];
 			myChips = data["points"];
@@ -152,12 +153,10 @@
 			$('#pointView').text("Chips: " + myChips + " (" + allMyChips + ")");
 			
 			mapAll = data["tipps"];
+			
 			//first loadMatches
 			getMatches();
-			setInterval(getMatches, 120000);
-			
-			
-			
+			setInterval(getMatches, 120000);		
 		  } else {
 			// handle data not found
 		  }
@@ -193,10 +192,10 @@
 				$('#votes').html(content);
 				
 				//add own tipps
-				map = mapAll[actWeek]; //change to actWeek
-				if(map == undefined) map = {};
-				for (var key in map) {
-					var value = map[key];
+				if(mapAll[actWeek] == undefined) mapAll[actWeek] = {}; //change to actWeek
+				
+				for (var key in mapAll[actWeek]) {
+					var value = mapAll[actWeek][key];
 					console.log(key + ": " + value.value + ", " + value.choice);
 					$('#'+key).find('input[name="pointInput"]').val(value.value);
 					$('#'+key).find('input[name=radios][value='+value.choice+']').prop("checked", true);
@@ -213,7 +212,7 @@
 						//hide save button
 						$('#' + matches[i].id).find('input[type="submit"]').hide();
 						//set wrong voted games red
-						var helpVote = map[matches[i].id];
+						var helpVote = mapAll[actWeek][matches[i].id];
 						if(helpVote != undefined) {
 							var vote = helpVote.choice;
 							var correct = false;
@@ -279,17 +278,17 @@
 				console.log(gameID + ": undefinded chips");
 				return false;
 			}
-			if(map[gameID] != undefined) {
-				var old = map[gameID].value;
+			if(mapAll[actWeek][gameID] != undefined) {
+				var old = mapAll[actWeek][gameID].value;
 				var diffToOld = chips-old;
-				if(diffToOld == 0 && map[gameID].choice == checkedValue) return console.log(gameID + ": bet didnt changed"); //bet didnt change
+				if(diffToOld == 0 && mapAll[actWeek][gameID].choice == checkedValue) return console.log(gameID + ": bet didnt changed"); //bet didnt change
 				if(diffToOld > myChips) {
 					//stop if not enough chips
 					alert("You dont have that much chips!");
 					return false;
 				}
-				map[gameID].value = chips;
-				map[gameID].choice = checkedValue;
+				mapAll[actWeek][gameID].value = chips;
+				mapAll[actWeek][gameID].choice = checkedValue;
 				myChips = myChips - diffToOld;
 			} else {
 				var diffToOld = chips;
@@ -298,7 +297,7 @@
 					alert("You dont have that much chips!");
 					return false;
 				}
-				map[gameID] = {"value": +chips, "choice": +checkedValue};
+				mapAll[actWeek][gameID] = {"value": +chips, "choice": +checkedValue};
 				myChips = myChips - diffToOld;
 			}
 			//BET PASSED
@@ -324,7 +323,7 @@
 				});
 				
 				//enable buttons after 5seconds, show countdown
-				var count = 4;
+				var count = 5;
 				var interval = setInterval(function(){
 					if(count == 0) {
 						for(var i=0; i<matches.length; i++) {
@@ -365,7 +364,7 @@
 				});
 				
 				//enable buttons after 5seconds, show countdown
-				var count = 4;
+				var count = 5;
 				var interval = setInterval(function(){
 					if(count == 0) {
 						for(var i=0; i<matches.length; i++) {

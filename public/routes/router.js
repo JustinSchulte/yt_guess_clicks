@@ -117,6 +117,7 @@ router.post('/save', (req, res) => {
 			}
 		});
 	});
+	res.end();
 });
 
 router.post('/saveall', (req, res) => {
