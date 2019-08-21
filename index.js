@@ -601,7 +601,12 @@ function nfl_actMatchday() {
 			
 			//YEAH, WE GOT SOME WIKIDATA, NOW IT BEGINS
 			var newWeek = wikiData;
-			newWeek = 1; //TODO delete
+			
+			var month = new Date().getMonth();
+			if(month == 7) {
+				newWeek = 1; //TODO delete
+				console.log("set week-variable to 1, while its august");
+			}
 			actWeek = newWeek;
 			refreshGamesDB(); //once at start (need actWeek)
 			
@@ -755,9 +760,9 @@ function getNewGames() {
 
 function nfl_games() {
 	var hour = new Date().getHours();
-	/*if(hour < 16 && hour >= 6) {
+	if(hour < 16 && hour >= 6) {
 		return; //only needed at game time -> fewer api calls
-	}*/
+	}
 	console.log("GET NFL GAMES");
 	db.collection('actWeek').find().toArray((err, data) => {
 		if (err) return console.log(err);
