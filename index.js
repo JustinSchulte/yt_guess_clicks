@@ -296,7 +296,6 @@ io.on('connection', function(socket){
 					gameOver = 1; //damit Button wieder gedrückt werden kann
 					return;
 				}
-				vid = "pdI6EwAqYZE";
 				console.log(vid);
 				io.emit('nv', vid);
 				
