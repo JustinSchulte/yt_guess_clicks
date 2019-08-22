@@ -87,6 +87,7 @@ var wm_points = new WeakMap();
 var video_clicks = -1;
 var gameOver = 1; //Zu Beginn ist die 0.te Runde vorbei
 var multipl = 1;
+var additor = 0;
 
 var startingConntectedPlayers = 0;
 var wm_startingPlayer = new WeakMap();
@@ -220,6 +221,7 @@ io.on('connection', function(socket){
 				gameOver = 1;
 				io.emit('actNextB'); //ak nextButton
 				multipl = 1;
+				additor = 0;
 			}
 		}
 		//lösche Spieler aus allen Listen
@@ -294,6 +296,7 @@ io.on('connection', function(socket){
 					gameOver = 1; //damit Button wieder gedrückt werden kann
 					return;
 				}
+				vid = "pdI6EwAqYZE";
 				console.log(vid);
 				io.emit('nv', vid);
 				
@@ -339,6 +342,23 @@ io.on('connection', function(socket){
 								}	
 							}
 						}
+						//VIDEO AVAILABLE 
+						if(!(typeof JSON.stringify(importedJSON.items[0]["snippet"]["defaultAudioLanguage"]) === "undefined")) { //check if german
+							var lang = importedJSON.items[0]["snippet"]["defaultAudioLanguage"];
+							console.log("languageAudio: " + lang);
+							if(lang.includes("de")) {
+								additor = additor+2; //ADDITOR
+								io.emit('chat message', "BONUS! GERMAN! +2");
+							} else if(!(typeof JSON.stringify(importedJSON.items[0]["snippet"]["defaultLanguage"]) === "undefined")) {
+								lang = importedJSON.items[0]["snippet"]["defaultLanguage"]
+								console.log("language: " + lang);
+								if(lang.includes("de")) {
+									additor = additor+2; //ADDITOR
+									io.emit('chat message', "BONUS! GERMAN! +2");
+								}
+							}
+						}
+						
 						var clicks = JSON.stringify(importedJSON.items[0]["statistics"]["viewCount"]);
 						clicks = clicks.substring(1, clicks.length-1); //delete ""
 						console.log("clicks: " + clicks);
@@ -392,6 +412,7 @@ io.on('connection', function(socket){
 			gameOver = 1;
 			io.emit('actNextB'); //ak nextButton
 			multipl = 1;
+			additor = 0;
 		} else {
 			var tipps = 0
 			for (var i in io.sockets.connected) {
@@ -466,8 +487,9 @@ function showResults() {
 	} else {
 		addPoints = 1;
 	}
-	addPoints = addPoints * multipl;
+	addPoints = (addPoints + additor) * multipl;
 	multipl = 1; //nur für diese Runde
+	additor = 0;
 	
 	for (var i = 0; i < win_s.length; i++) {
 		var p_addPoints = addPoints;
