@@ -642,6 +642,7 @@ function nfl_actMatchday() {
 					{ id: 'act_week' },
 					{ $set: { 'week': newWeek } }
 				);
+				//save pointHistory and get weekly income
 				db.collection('users').find().toArray((err, users) => {
 					for(var i=0; i<users.length; i++) {
 						addPointHistory(users[i].username);
@@ -836,16 +837,18 @@ function nfl_games() {
 										if(games[j].state == "NotStarted" || games[j].state == "HasStarted") {
 											//scheduled changed to finished -> refresh and update points
 											//update games db
-											var winner = "HOME_TEAM";
+											var winner = "NONE";
 											if(matches[i].HomeScore<matches[i].AwayScore) {
 												winner = "AWAY_TEAM";
+											} else if(matches[i].HomeScore>matches[i].AwayScore) {
+												winner = "HOME_TEAM";
 											}
 											updateFinishedGame(gameID, winner);
 											
 											//iterate users
 											for(var k=0; k<users.length; k++) {
 												if(users[k].tipps[actWeek][gameID] != undefined) {
-													console.log("uh yeah theres a vote");
+													console.log("uh yeah, theres a vote");
 													var stake = users[k].tipps[actWeek][gameID].value;
 													console.log("reward_before:" + stake);
 													var vote = users[k].tipps[actWeek][gameID].choice;
@@ -1030,6 +1033,11 @@ function wm_games() {
 
 function addPointHistory(name) {
 	User.findOne({username: name}, function (err, user) {
+		//add weekly income to points 
+		//allpoints should be equal to points at this time
+		user.points = parseInt(user.points) + 2000;
+		user.allpoints = parseInt(user.allpoints) + 2000;
+		//save pointhistory for week
 		var pointhistory = user.pointhistory;
 		pointhistory.set((actWeek-1).toString(), user.points);
 		user.save(function (err) {
