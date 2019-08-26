@@ -624,9 +624,10 @@ function nfl_actMatchday() {
 			var newWeek = wikiData;
 			
 			var month = new Date().getMonth();
-			if(month == 7) {
+			var day = new Date().getDate();
+			if(month == 7 || (month == 8 && day<5)) { //till 5.9.
 				newWeek = 1; //TODO delete
-				console.log("set week-variable to 1, while its august");
+				console.log("set week-variable to 1, while its pre-season");
 			}
 			actWeek = newWeek;
 			refreshGamesDB(); //once at start (need actWeek)
@@ -642,13 +643,11 @@ function nfl_actMatchday() {
 					{ id: 'act_week' },
 					{ $set: { 'week': newWeek } }
 				);
-				//save pointHistory and get weekly income
-				db.collection('users').find().toArray((err, users) => {
-					for(var i=0; i<users.length; i++) {
-						addPointHistory(users[i].username);
-					}
-					return;
-				});
+				
+				//distribute all points for this week (includes income and pointHistory)
+				distributePoints();
+
+				//get games for new week
 				getNewGames();
 			});
 			//END
@@ -780,6 +779,47 @@ function getNewGames() {
 	});
 }
 
+function distributePoints() {
+	var lastWeek = actWeek-1;
+	
+	db.collection('users').find().toArray((err, users) => {
+		if (err) return console.log(err);
+		db.collection('games').find({week:lastWeek}).toArray((err, games) => {
+			if (err) return console.log(err);		
+			for(var i=0; i<users.length; i++) {
+				var allreward = 0;
+				if(users[i].tipps[lastWeek] != undefined) { //no votes this week from user[i]
+					for(var j=0; j<games.length; j++) {
+						var gameID = games[j].id;
+						if(users[i].tipps[lastWeek][gameID] != undefined) {
+							console.log("uh yeah, theres a vote");
+							var stake = users[i].tipps[lastWeek][gameID].value;
+							console.log("reward_before:" + stake);
+							var vote = users[i].tipps[lastWeek][gameID].choice;
+							var quote = 0;
+							var winner = games[j].winner;
+							console.log("vote: " + vote);
+							console.log("winner: " + winner);
+							if(vote == 0 && winner == "HOME_TEAM") {
+								quote = games[j].quoteHome;
+							} else if(vote == 1 && winner == "AWAY_TEAM") {
+								quote = games[j].quoteAway;
+								console.log("reward_after:" + stake);
+							}
+							var reward = stake * quote;
+							reward = Math.ceil(reward)
+							console.log("reward_now:" + reward);
+							allreward += reward;	
+						}
+					}
+				}
+				//update users db
+				updateUserPoints(users[i].username, allreward);
+			}
+		});
+	});
+}
+
 function nfl_games() {
 	var hour = new Date().getHours();
 	if(hour < 16 && hour >= 6) {
@@ -824,76 +864,45 @@ function nfl_games() {
 				var matches = wikiData;
 				
 				db.collection('games').find({week:actWeek}).toArray((err, games) => {
-					if (err) return console.log(err);
-				
-					db.collection('users').find().toArray((err, users) => {
-						if (err) return console.log(err);
-						
-						for(var i=0; i<matches.length; i++) {
-							var gameID = matches[i].HomeTeam + "_" + matches[i].AwayTeam;
-							if(matches[i].IsOver) { //is Game over?
-								for(var j=0; j<games.length; j++) {
-									if(games[j].id == gameID) {
-										if(games[j].state == "NotStarted" || games[j].state == "HasStarted") {
-											//scheduled changed to finished -> refresh and update points
-											//update games db
-											var winner = "NONE";
-											if(matches[i].HomeScore<matches[i].AwayScore) {
-												winner = "AWAY_TEAM";
-											} else if(matches[i].HomeScore>matches[i].AwayScore) {
-												winner = "HOME_TEAM";
-											}
-											updateFinishedGame(gameID, winner);
-											
-											//iterate users
-											for(var k=0; k<users.length; k++) {
-												if(users[k].tipps[actWeek][gameID] != undefined) {
-													console.log("uh yeah, theres a vote");
-													var stake = users[k].tipps[actWeek][gameID].value;
-													console.log("reward_before:" + stake);
-													var vote = users[k].tipps[actWeek][gameID].choice;
-													var quote = 0;
-													console.log("vote: " + vote);
-													console.log("winner: " + winner);
-													if(vote == 0 && winner == "HOME_TEAM") {
-														quote = games[j].quoteHome;
-													} else if(vote == 1 && winner == "AWAY_TEAM") {
-														quote = games[j].quoteAway;
-														console.log("reward_after:" + stake);
-													}
-													var reward = stake * quote;
-													reward = Math.ceil(reward)
-													console.log("reward_now:" + reward);
-													
-													//update users db
-													changeUserPoints(users[k].username, reward, stake);
-												}
-											}
+					if (err) return console.log(err);						
+					for(var i=0; i<matches.length; i++) {
+						var gameID = matches[i].HomeTeam + "_" + matches[i].AwayTeam;
+						if(matches[i].IsOver) { //is Game over?
+							for(var j=0; j<games.length; j++) {
+								if(games[j].id == gameID) {
+									if(games[j].state == "NotStarted" || games[j].state == "HasStarted") {
+										//scheduled changed to finished -> refresh and update points
+										//update games db
+										var winner = "NONE";
+										if(matches[i].HomeScore<matches[i].AwayScore) {
+											winner = "AWAY_TEAM";
+										} else if(matches[i].HomeScore>matches[i].AwayScore) {
+											winner = "HOME_TEAM";
 										}
-									}
-								}
-							} else if(matches[i].HasStarted) { //has game started?
-								var gameID = matches[i].homeTeam.name + "_" + matches[i].awayTeam.name;
-								for(var j=0; j<games.length; j++) {
-									if(games[j].id == gameID) {
-										if(games[j].state == "NotStarted") {
-											//scheduled changed to IN_PLAY -> refresh db games
-											game.findOne({id: games[j].id}, function (err, match) {
-												match.state = "IN_PLAY";
-												match.save(function (err) {
-													if(err) {
-														console.error('ERROR!');
-													}
-												});
-											});
-										}
+										updateFinishedGame(gameID, winner);
 									}
 								}
 							}
-							
-						}
-						setTimeout(refreshGamesDB, 1000*5);
-					});
+						} else if(matches[i].HasStarted) { //has game started?
+							var gameID = matches[i].homeTeam.name + "_" + matches[i].awayTeam.name;
+							for(var j=0; j<games.length; j++) {
+								if(games[j].id == gameID) {
+									if(games[j].state == "NotStarted") {
+										//scheduled changed to IN_PLAY -> refresh db games
+										game.findOne({id: games[j].id}, function (err, match) {
+											match.state = "IN_PLAY";
+											match.save(function (err) {
+												if(err) {
+													console.error('ERROR!');
+												}
+											});
+										});
+									}
+								}
+							}
+						}					
+					}
+					setTimeout(refreshGamesDB, 1000*5);
 				});
 				//END
 			});
@@ -1031,6 +1040,39 @@ function wm_games() {
 	
 }
 
+function updateUserPoints(name, reward) {
+	User.findOne({username: name}, function (err, user) {
+		console.log("points_before:" + user.points);
+		//add weekly income to points 
+		//allpoints should be equal to points at this time
+		user.points = parseInt(user.points) + reward + 2000;
+		user.allpoints = parseInt(user.points);
+		console.log("points_now:" + user.points);
+		//save pointhistory for week
+		var pointhistory = user.pointhistory;
+		pointhistory.set((actWeek-1).toString(), user.points);
+		user.save(function (err) {
+			if(err) {
+				console.error('ERROR!');
+			}
+		});
+	});
+}
+
+function updateFinishedGame(game_id, winner, regular) {
+	game.findOne({id: game_id}, function (err, match) {
+		match.state = "IsOver";
+		match.winner = winner;
+		match.regular = regular;
+		match.save(function (err) {
+			if(err) {
+				console.error('ERROR!');
+			}
+		});
+	});
+}
+
+/*
 function addPointHistory(name) {
 	User.findOne({username: name}, function (err, user) {
 		//add weekly income to points 
@@ -1061,16 +1103,4 @@ function changeUserPoints(name, reward, stake) {
 		});
 	});
 }
-
-function updateFinishedGame(game_id, winner, regular) {
-	game.findOne({id: game_id}, function (err, match) {
-		match.state = "IsOver";
-		match.winner = winner;
-		match.regular = regular;
-		match.save(function (err) {
-			if(err) {
-				console.error('ERROR!');
-			}
-		});
-	});
-}
+*/

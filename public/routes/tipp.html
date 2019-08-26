@@ -274,8 +274,14 @@
 			}
 			if(chips == undefined) {
 				//stop if no chips bet
-				if(!saveAllInduced) alert("You have to select a team!");
+				if(!saveAllInduced) alert("You have to set your stake!");
 				console.log(gameID + ": undefinded chips");
+				return false;
+			}
+			if(chips < 0) {
+				//stop if negative chips bet
+				if(!saveAllInduced) alert("Your stake cant be negative!");
+				console.log(gameID + ": negative chips");
 				return false;
 			}
 			if(mapAll[actWeek][gameID] != undefined) {
