@@ -870,7 +870,7 @@ function nfl_games() {
 						if(matches[i].IsOver) { //is Game over?
 							for(var j=0; j<games.length; j++) {
 								if(games[j].id == gameID) {
-									if(games[j].state == "NotStarted" || games[j].state == "HasStarted") {
+									if(games[j].state == "NotStarted" || games[j].state == "InPlay") {
 										//scheduled changed to finished -> refresh and update points
 										//update games db
 										var winner = "NONE";
@@ -891,7 +891,7 @@ function nfl_games() {
 									if(games[j].state == "NotStarted") {
 										//scheduled changed to IN_PLAY -> refresh db games
 										game.findOne({id: games[j].id}, function (err, match) {
-											match.state = "IN_PLAY";
+											match.state = "InPlay";
 											match.save(function (err) {
 												if(err) {
 													console.error('ERROR!');
