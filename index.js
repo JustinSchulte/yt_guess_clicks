@@ -568,7 +568,7 @@ function getFrequentNFLStats() {
 	setTimeout(nfl_actMatchday, 1000*1);
 	setInterval(nfl_actMatchday, 1000*60*60*12); //twice each day
 	setTimeout(nfl_games, 1000*180);
-	setInterval(nfl_games, 1000*60*60*24); //each 30minutes
+	setInterval(nfl_games, 1000*60*30); //each 30minutes
 	setInterval(refreshUserDB, 1000*60*5); //each 5minutes
 }
 
