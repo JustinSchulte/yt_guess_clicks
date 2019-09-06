@@ -236,6 +236,9 @@
 								$('#' + matches[i].id).find('label[for="' + forWhat + '"]').css("background-color", "#12BC4E");
 							}
 						}
+					} else if(matches[i].state == "InPlay") {
+						//hide save button
+						$('#' + matches[i].id).find('input[type="submit"]').hide();
 					}
 				}
 				
