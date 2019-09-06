@@ -567,7 +567,7 @@ function getFrequentNFLStats() {
 	
 	setTimeout(nfl_actMatchday, 1000*1);
 	setInterval(nfl_actMatchday, 1000*60*60*12); //twice each day
-	setTimeout(nfl_games, 1000*180);
+	setTimeout(nfl_games, 1000*60);
 	setInterval(nfl_games, 1000*60*30); //each 30minutes
 	setInterval(refreshUserDB, 1000*60*5); //each 5minutes
 }
@@ -864,7 +864,7 @@ function nfl_games() {
 				var matches = wikiData;
 				
 				db.collection('games').find({week:actWeek}).toArray((err, games) => {
-					if (err) return console.log(err);						
+					if (err) return console.log(err);			
 					for(var i=0; i<matches.length; i++) {
 						var gameID = matches[i].HomeTeam + "_" + matches[i].AwayTeam;
 						if(matches[i].IsOver) { //is Game over?
@@ -884,7 +884,8 @@ function nfl_games() {
 								}
 							}
 						} else if(matches[i].HasStarted) { //has game started?
-							var gameID = matches[i].homeTeam.name + "_" + matches[i].awayTeam.name;
+							var gameID = matches[i].HomeTeam + "_" + matches[i].AwayTeam;
+							console.log("HasStarted: " + gameID);
 							for(var j=0; j<games.length; j++) {
 								if(games[j].id == gameID) {
 									if(games[j].state == "NotStarted") {
