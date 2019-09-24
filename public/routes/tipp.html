@@ -122,6 +122,9 @@
 		var users;
 		var actWeek;
 		
+		//design
+		var opacity = 20;
+		
 		var newTippsArray = [];
 	
 		const getCookie = (name) => {
@@ -208,20 +211,23 @@
 						$('#' + matches[i].id).find('input[name="pointInput"]').prop("disabled",false);
 						$('#' + matches[i].id).find('input[type="submit"]').prop("disabled",false);
 						$('#' + matches[i].id).find('input[name=radios]').prop("disabled",false);
-					} else if(matches[i].state == "IsOver") {
+					} else if(matches[i].state == "IsOver") { //mark winners, loser and correct bets
 						//hide save button
 						$('#' + matches[i].id).find('input[type="submit"]').hide();
+						//get winnerId
+						var winnerId = -1;
+						if(matches[i].winner == "HOME_TEAM") winnerId = 0;
+						else if(matches[i].winner == "AWAY_TEAM") winnerId = 1;
 						//set wrong voted games red
 						var helpVote = mapAll[actWeek][matches[i].id];
-						if(helpVote != undefined) {
+						if(helpVote != undefined) { //you have voted
 							var vote = helpVote.choice;
 							var correct = false;
 							console.log("finishedMatch: " + matches[i].id);
 							console.log("vote: " + vote)
-							//TODO vote == 0 or 1(away team), no more draw
-							if(vote == 0 && matches[i].winner == "HOME_TEAM") {
+							if(vote == winnerId) {
 								correct = true;
-							} else if(vote == 1 && matches[i].winner == "AWAY_TEAM") {
+							} else if(vote == winnerId) {
 								correct = true;
 							}
 							console.log("correct: " + correct);
@@ -230,11 +236,37 @@
 								//set red color
 								var forWhat = $('#' + matches[i].id).find('input[name=radios]:checked').attr('id');
 								$('#' + matches[i].id).find('label[for="' + forWhat + '"]').css("background-color", "#84191C");
+								if(winnerId != -1) {
+									//set winner transparacy
+									var forWhat = $('#' + matches[i].id).find('input[name=radios][value=' + winnerId + ']').attr('id');
+									$('#' + matches[i].id).find('label[for="' + forWhat + '"]').css("background-color", convertHex('#12BC4E', opacity));
+								} else {
+									//case DRAW (two losers)
+									var forWhat = $('#' + matches[i].id).find('input[name=radios][value=' + (1-vote) + ']').attr('id'); //not voted for team
+									$('#' + matches[i].id).find('label[for="' + forWhat + '"]').css("background-color", convertHex('#84191C', opacity));
+								}
 							} else {
 								//set green color
 								var forWhat = $('#' + matches[i].id).find('input[name=radios]:checked').attr('id');
 								$('#' + matches[i].id).find('label[for="' + forWhat + '"]').css("background-color", "#12BC4E");
+								//set loser transparacy
+								var forWhat = $('#' + matches[i].id).find('input[name=radios][value=' + (1-winnerId) + ']').attr('id');
+								$('#' + matches[i].id).find('label[for="' + forWhat + '"]').css("background-color", convertHex('#84191C', opacity));
 							}
+						} else if(winnerId != -1){ //case not voted (not draw)
+							//set winner transparacy
+							var forWhat = $('#' + matches[i].id).find('input[name=radios][value=' + winnerId + ']').attr('id');
+							$('#' + matches[i].id).find('label[for="' + forWhat + '"]').css("background-color", convertHex('#12BC4E', opacity));
+							//set loser transparacy
+							var forWhat = $('#' + matches[i].id).find('input[name=radios][value=' + (1-winnerId) + ']').attr('id');
+							$('#' + matches[i].id).find('label[for="' + forWhat + '"]').css("background-color", convertHex('#84191C', opacity));
+						} else { //case DRAW (and not voted)
+							//set loser1 transparacy
+							var forWhat = $('#' + matches[i].id).find('input[name=radios][value=0]').attr('id');
+							$('#' + matches[i].id).find('label[for="' + forWhat + '"]').css("background-color", convertHex('#12BC4E', opacity));
+							//set loser2 transparacy
+							var forWhat = $('#' + matches[i].id).find('input[name=radios][value=1]').attr('id');
+							$('#' + matches[i].id).find('label[for="' + forWhat + '"]').css("background-color", convertHex('#84191C', opacity));
 						}
 					} else if(matches[i].state == "InPlay") {
 						//hide save button
@@ -257,6 +289,15 @@
 			.catch(function(error) {
 			  console.log(error);
 			});
+		}
+		
+		function convertHex(hex,opacity){
+			hex = hex.replace('#','');
+			r = parseInt(hex.substring(0,2), 16);
+			g = parseInt(hex.substring(2,4), 16);
+			b = parseInt(hex.substring(4,6), 16);
+			result = 'rgba('+r+','+g+','+b+','+opacity/100+')';
+			return result;
 		}
 		
 		function submitBet(form) {
