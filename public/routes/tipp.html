@@ -294,9 +294,12 @@
 		function convertHex(hex,opacity){
 			hex = hex.replace('#','');
 			r = parseInt(hex.substring(0,2), 16);
+			r = 255*0.8+r*0.2;
 			g = parseInt(hex.substring(2,4), 16);
+			g = 255*0.8+g*0.2;
 			b = parseInt(hex.substring(4,6), 16);
-			result = 'rgba('+r+','+g+','+b+','+opacity/100+')';
+			b = 255*0.8+b*0.2;
+			result = 'rgb('+r+','+g+','+b+')';
 			return result;
 		}
 		
