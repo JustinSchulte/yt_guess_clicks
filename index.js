@@ -566,10 +566,22 @@ function getFrequentNFLStats() {
 	refreshUserDB(); //once at start
 	
 	setTimeout(nfl_actMatchday, 1000*1);
-	setInterval(nfl_actMatchday, 1000*60*60*12); //twice each day
 	setTimeout(nfl_games, 1000*60); //after 1min
 	setInterval(nfl_games, 1000*60*30); //each 30minutes
 	setInterval(refreshUserDB, 1000*60*5); //each 5minutes
+}
+
+function scheduleWeekChange() {
+	//just refresh every new day at ~1am
+	var date = new Date();
+	var afterMidnight = date.getHours()-7; //-6 because EST, -1 to be safe
+	var timeoutValue = -1;
+	if(afterMidnight < 0) {
+		timeoutValue = -afterMidnight;
+	} else {
+		timeoutValue = 24-afterMidnight;
+	}
+	setTimeout(nfl_actMatchday, 1000*60*60*timeoutValue);
 }
 
 function refreshUserDB() {
@@ -650,6 +662,7 @@ function nfl_actMatchday() {
 				//get games for new week
 				getNewGames();
 			});
+			scheduleWeekChange(); //prepare next actWeek-Function call
 			//END
 		});
 	});
@@ -657,6 +670,7 @@ function nfl_actMatchday() {
 	req.end();
     req.on('error', function (err) {
         console.log("GET ACTUAL NFL WEEK: " + err)
+		setTimeout(nfl_actMatchday, 1000*60*30);
     });
 }
 
