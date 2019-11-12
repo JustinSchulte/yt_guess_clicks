@@ -79,7 +79,7 @@ router.get('/tipp', function (req, res, next) {
 			 });
 			 res.sendFile(path.join(__dirname + '/tipp.html')); 
 			 console.log(user.username + " logged in");
-			 console.log(JSON.stringify(user));			 
+			 console.log(req.cookie);			 
         }
       }
     });
