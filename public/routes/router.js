@@ -70,8 +70,10 @@ router.get('/tipp', function (req, res, next) {
           return next(err);
         } else {
 			 console.log(user.username + " logged in");
-			 res.sendFile(path.join(__dirname + '/tipp.html'));
+			 console.log(JSON.stringify(user));
 			 res.cookie('data', JSON.stringify(user));
+			 res.sendFile(path.join(__dirname + '/tipp.html'));
+			 
         }
       }
     });
