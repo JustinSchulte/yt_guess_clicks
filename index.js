@@ -177,6 +177,7 @@ var gameArray;
 var userArray;
 app.get('/clicks', (req, res) => {
 	result = {"games":gameArray, "users":userArray};
+	console.log("send back: " + gameArray);
 	res.send(result);
 });
 
@@ -596,6 +597,8 @@ function refreshGamesDB() {
 	//add games of new week from db
 	db.collection('games').find({week:actWeek}).toArray((err, games) => {
 		if (err) return console.log(err);
+		console.log("readDB week: " + actWeek);
+		console.log("readDB games: " + sgames);
 		gameArray = games;
 	});
 }
