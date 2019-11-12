@@ -77,6 +77,7 @@ router.get('/tipp', function (req, res, next) {
 			 console.log(user.username + " logged in");
 			 console.log(JSON.stringify(user));
 			 res.cookie('data', JSON.stringify(user));
+			 return next(err);
         }
       }
     });
