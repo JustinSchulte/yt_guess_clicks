@@ -3,6 +3,8 @@ var router = express.Router();
 var User = require('../models/user');
 var path = require('path');
 
+app.use(express.cookieParser());
+
 // GET route for reading data
 router.get('/', function (req, res, next) {
   return res.sendFile(path.join(__dirname + '/wm.html'));
@@ -72,8 +74,7 @@ router.get('/tipp', function (req, res, next) {
 			 console.log(user.username + " logged in");
 			 console.log(JSON.stringify(user));
 			 res.cookie('data', JSON.stringify(user));
-			 res.sendFile(path.join(__dirname + '/tipp.html'));
-			 
+			 res.sendFile(path.join(__dirname + '/tipp.html')); 
         }
       }
     });
