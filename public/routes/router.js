@@ -1,11 +1,11 @@
 var express = require('express');
-//var cookieParser = require('cookie-parser')
+var cookieParser = require('cookie-parser')
 var router = express.Router();
 var User = require('../models/user');
 var path = require('path');
 
-//var app = express();
-//app.use(cookieParser());
+var app = express();
+app.use(cookieParser());
 
 // GET route for reading data
 router.get('/', function (req, res, next) {
@@ -77,7 +77,6 @@ router.get('/tipp', function (req, res, next) {
 			 console.log(user.username + " logged in");
 			 console.log(JSON.stringify(user));
 			 res.cookie('data', JSON.stringify(user));
-			 next();
         }
       }
     });
