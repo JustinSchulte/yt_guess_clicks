@@ -73,7 +73,10 @@ router.get('/tipp', function (req, res, next) {
           err.status = 400;
           return next(err);
         } else {
-			 res.cookie('data', JSON.stringify(user));
+			 res.cookie('data', JSON.stringify(user), {
+				  expires  : new Date(Date.now() + 9999999),
+				  httpOnly : false
+			 });
 			 res.sendFile(path.join(__dirname + '/tipp.html')); 
 			 console.log(user.username + " logged in");
 			 console.log(JSON.stringify(user));			 
