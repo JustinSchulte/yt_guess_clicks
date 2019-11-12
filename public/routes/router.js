@@ -1,11 +1,11 @@
 var express = require('express');
-var cookieParser = require('cookie-parser')
+//var cookieParser = require('cookie-parser')
 var router = express.Router();
 var User = require('../models/user');
 var path = require('path');
 
-var app = express();
-app.use(cookieParser());
+//var app = express();
+//app.use(cookieParser());
 
 // GET route for reading data
 router.get('/', function (req, res, next) {
