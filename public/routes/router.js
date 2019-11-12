@@ -1,7 +1,11 @@
 var express = require('express');
+var cookieParser = require('cookie-parser')
 var router = express.Router();
 var User = require('../models/user');
 var path = require('path');
+
+var app = express();
+app.use(cookieParser());
 
 // GET route for reading data
 router.get('/', function (req, res, next) {
@@ -74,6 +78,7 @@ router.get('/tipp', function (req, res, next) {
 			 res.cookie('data', JSON.stringify(user));
 			 res.sendFile(path.join(__dirname + '/tipp.html')); 
         }
+		next();
       }
     });
 });
