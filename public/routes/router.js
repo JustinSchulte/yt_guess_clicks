@@ -73,7 +73,7 @@ router.get('/tipp', function (req, res, next) {
           err.status = 400;
           return next(err);
         } else {
-			 res.cookie('data', "3443", {
+			 res.cookie('data', JSON.stringify(user), {
 				  expires  : new Date(Date.now() + 9999999),
 				  httpOnly : false
 			 });
