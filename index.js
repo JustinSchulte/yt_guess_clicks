@@ -598,7 +598,7 @@ function refreshGamesDB() {
 	db.collection('games').find({week:actWeek}).toArray((err, games) => {
 		if (err) return console.log(err);
 		console.log("readDB week: " + actWeek);
-		console.log("readDB games: " + sgames);
+		console.log("readDB games: " + games);
 		gameArray = games;
 	});
 }
