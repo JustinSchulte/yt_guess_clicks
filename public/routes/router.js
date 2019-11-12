@@ -3,8 +3,6 @@ var router = express.Router();
 var User = require('../models/user');
 var path = require('path');
 
-app.use(express.cookieParser());
-
 // GET route for reading data
 router.get('/', function (req, res, next) {
   return res.sendFile(path.join(__dirname + '/wm.html'));
