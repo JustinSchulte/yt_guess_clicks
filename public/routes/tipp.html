@@ -143,10 +143,12 @@
 		};
 
 		window.onload = () => {
+		  console.log("window loaded...");
 		  let dataCookie = getCookie('data');
 		  deleteCookie('data');
 		  
 		  if(dataCookie) {
+			console.log("got cookie");
 			const data = parseObjectFromCookie(dataCookie);
 			dataCookie = false;
 			//data is all data from logged in user
@@ -162,16 +164,19 @@
 			setInterval(getMatches, 120000);		
 		  } else {
 			// handle data not found
+			console.log("no coookie ...");
 		  }
 		}
 		
 		function getMatches() {
+			console.log("fetch matches");
 			fetch('/clicks', {method: 'GET'})
 			.then(function(response) {
 			  if(response.ok) return response.json();
 			  throw new Error('Request failed.');
 			})
 			.then(function(data) {
+				console.log("received matches");
 				matches = data.games;
 				users = data.users;
 				
@@ -181,6 +186,7 @@
 				//add Matches
 				var content = '';
 				for(var i=0; i<matches.length; i++) {
+					console.log("match_id: " + matches[i].id);
 					var currentId = matches[i].id;
 					var homeTeam = matches[i].homeFullName;
 					var awayTeam = matches[i].awayFullName;
