@@ -73,30 +73,31 @@ router.get('/tipp', function (req, res, next) {
           err.status = 400;
           return next(err);
         } else {
-			var userDummy = {};
-			Object.assign(userDummy, user);
 			//delete all tipps entries (except for actual "highest" week)
 			var maxWeek = 0;
 			console.log("size: " + user.tipps.size);
-			for(const k of userDummy.tipps.keys()) {
+			for(const k of user.tipps.keys()) {
 				var key = parseInt(k);
 				console.log("t: " + key);
 				if(key > maxWeek) maxWeek = key;
 			}
 			console.log("maxWeek: " + maxWeek);
-			for(const k of userDummy.tipps.keys()) {
+			for(const k of user.tipps.keys()) {
 				if(parseInt(k) != maxWeek) {
-					userDummy.tipps.delete(k);
+					user.tipps.delete(k);
 				}
 			}
+			user.delete(password);
 			
+			console.log(user);
+			console.log("");
 			
-			 res.cookie('data', JSON.stringify(userDummy), {
+			 res.cookie('data', JSON.stringify(user), {
 				  expires  : new Date(Date.now() + 9999999),
 				  httpOnly : false
 			 });
 			 res.sendFile(path.join(__dirname + '/tipp.html')); 
-			 console.log(userDummy.username + " logged in");
+			 console.log(user.username + " logged in");
 			 console.log(JSON.stringify(req.cookies));			 
         }
       }
