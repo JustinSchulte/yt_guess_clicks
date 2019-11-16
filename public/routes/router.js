@@ -87,7 +87,7 @@ router.get('/tipp', function (req, res, next) {
 					user.tipps.delete(k);
 				}
 			}
-			
+			delete(user.password);
 			console.log(user);
 			console.log("");
 			
