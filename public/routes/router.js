@@ -75,9 +75,10 @@ router.get('/tipp', function (req, res, next) {
         } else {
 			//delete all tipps entries (except for actual "highest" week)
 			var maxWeek = 0;
-			for(var key in user["tipps"]) {
-				console.log("t: " + key);
-				if(key > maxWeek) maxWeek = key;
+			console.log("size: " + user.tipps.size);
+			for(const k of user.tipps.keys()) {
+				console.log("t: " + k);
+				if(k > maxWeek) maxWeek = k;
 			}
 			console.log("maxWeek: " + maxWeek);
 			
