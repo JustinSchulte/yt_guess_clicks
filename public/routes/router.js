@@ -73,7 +73,7 @@ router.get('/tipp', function (req, res, next) {
           err.status = 400;
           return next(err);
         } else {
-			var userDummy;
+			var userDummy = {};
 			Object.assign(userDummy, user);
 			//delete all tipps entries (except for actual "highest" week)
 			var maxWeek = 0;
