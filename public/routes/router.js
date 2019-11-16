@@ -73,6 +73,14 @@ router.get('/tipp', function (req, res, next) {
           err.status = 400;
           return next(err);
         } else {
+			//delete all tipps entries (except for actual "highest" week)
+			var maxWeek = 0;
+			for(var key in user.tipps) {
+				console.log("t: " + key);
+				if(key > maxWeek) maxWeek = key;
+			}
+			console.log("maxWeek: " + maxWeek);
+			
 			 res.cookie('data', JSON.stringify(user), {
 				  expires  : new Date(Date.now() + 9999999),
 				  httpOnly : false
