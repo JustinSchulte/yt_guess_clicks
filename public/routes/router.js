@@ -78,7 +78,8 @@ router.get('/tipp', function (req, res, next) {
 			console.log("size: " + user.tipps.size);
 			for(const k of user.tipps.keys()) {
 				console.log("t: " + k);
-				if(k > maxWeek) maxWeek = k;
+				if(k >= maxWeek) maxWeek = k;
+				console.log("maxWeek: " + maxWeek);
 			}
 			console.log("maxWeek: " + maxWeek);
 			
