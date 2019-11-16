@@ -73,13 +73,12 @@ router.get('/tipp', function (req, res, next) {
           err.status = 400;
           return next(err);
         } else {
-			user = user.toObject();
+			user = user.toObject(); //necessary to manipulate object
 			//delete all tipps entries (except for actual "highest" week)
 			var maxWeek = 0;
 			console.log("size: " + user.tipps.size);
 			for(const k of user.tipps.keys()) {
 				var key = parseInt(k);
-				console.log("t: " + key);
 				if(key > maxWeek) maxWeek = key;
 			}
 			console.log("maxWeek: " + maxWeek);
@@ -88,9 +87,8 @@ router.get('/tipp', function (req, res, next) {
 					user.tipps.delete(k);
 				}
 			}
+			//dont send password
 			delete user.password;
-			console.log(user);
-			console.log("");
 			
 			 res.cookie('data', JSON.stringify(user), {
 				  expires  : new Date(Date.now() + 9999999),
