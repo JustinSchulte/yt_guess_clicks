@@ -201,6 +201,10 @@
 				$('#votes').html(content);
 				
 				//add own tipps
+				console.log("votes:");
+				console.log(mapAll);
+				console.log("actWeek: " + actWeek);
+				console.log(mapAll[actWeek]);
 				if(mapAll[actWeek] == undefined) mapAll[actWeek] = {}; //change to actWeek
 				
 				for (var key in mapAll[actWeek]) {

@@ -72,8 +72,8 @@ router.get('/tipp', function (req, res, next) {
           var err = new Error('Not authorized! Go back!');
           err.status = 400;
           return next(err);
-        } else {
 			user = user.toObject(); //necessary to manipulate object
+        } else {
 			//delete all tipps entries (except for actual "highest" week)
 			var maxWeek = 0;
 			console.log("size: " + user.tipps.size);
