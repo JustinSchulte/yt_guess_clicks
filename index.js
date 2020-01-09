@@ -656,7 +656,7 @@ function nfl_actMatchday() {
 				console.log("Week changed!")
 				db.collection('actWeek').updateOne( //save actWeek to db
 					{ id: 'act_week' },
-					{ $set: { 'week': newWeek } }
+					{ $set: { 'week': actWeek } }
 				);
 				
 				//distribute all points for this week (includes income and pointHistory)
