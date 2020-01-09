@@ -644,7 +644,7 @@ function nfl_actMatchday() {
 				newWeek = 1; //TODO delete
 				console.log("set week-variable to 1, while its pre-season");
 			}
-			actWeek = newWeek;
+			actWeek = newWeek+17; //TODO playoff shit
 			refreshGamesDB(); //once at start (need actWeek)
 			
 			db.collection('actWeek').find().toArray((err, data) => {
@@ -730,7 +730,7 @@ function getNewOdds() {
 
 function getNewGames() {
 	console.log("GET NEW GAMES");
-	var pathActWeek = '/v3/nfl/scores/json/ScoresByWeek/2019/' + actWeek;
+	var pathActWeek = '/v3/nfl/scores/json/ScoresByWeek/2019POST/' + (actWeek-17); //TODO POST because playoffs
 
 	var wikiData; //JSON Data result
 	var options = {
@@ -845,7 +845,7 @@ function nfl_games() {
 	console.log("GET NFL GAMES");
 	db.collection('actWeek').find().toArray((err, data) => {
 		if (err) return console.log(err);
-		var pathActWeek = '/v3/nfl/scores/json/ScoresByWeek/2019/' + data[0].week;
+		var pathActWeek = '/v3/nfl/scores/json/ScoresByWeek/2019POST/' + (data[0].week-17); //TODO POST because playoffs and -17
 	
 		var wikiData; //JSON Data result
 		var options = {
