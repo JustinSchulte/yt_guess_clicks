@@ -52,6 +52,8 @@
 			<button class="button" id="nfl">NFL-Tippspiel</button>
 			<br>
 			<button class="button" id="chess">AutoChess</button>
+            <br>
+			<button class="button" id="tm_rules">TerRulez</button>
 		</div>
 		
 		
@@ -133,6 +135,18 @@
 							break;
 						case 2:
 							window.open("/autochess");
+							break;
+						case 3:
+							break;
+					}
+				});
+                $("#tm_rules").on('click auxclick contextmenu', function(e) {
+					switch(e.which) {
+						case 1:
+							window.location = "/terRulez";
+							break;
+						case 2:
+							window.open("/terRulez");
 							break;
 						case 3:
 							break;

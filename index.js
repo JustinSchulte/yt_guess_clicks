@@ -124,6 +124,9 @@ app.get('/nfl', function(req, res){
 app.get('/autochess', function(req, res){
 	res.sendFile(__dirname + '/autochess.html');
 });
+app.get('/terRulez', function(req, res){
+	res.sendFile(__dirname + '/terRulez.html');
+});
 
 app.use(express.static(path.join(__dirname, 'public')));
 var favicon = require('serve-favicon');
