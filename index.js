@@ -115,9 +115,6 @@ app.get('/montagsmaler', function(req, res){
 app.get('/memes', function(req, res){
 	res.sendFile(__dirname + '/memes.html');
 });
-app.get('/memes', function(req, res){
-	res.sendFile(__dirname + '/memes.html');
-});
 app.get('/nfl', function(req, res){
 	res.sendFile(__dirname + '/nfl.html');
 });
