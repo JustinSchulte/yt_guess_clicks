@@ -644,10 +644,7 @@ function nfl_actMatchday() {
 				newWeek = 1; //TODO delete
 				console.log("set week-variable to 1, while its pre-season");
 			}
-			actWeek = newWeek+17; //TODO playoff shit
-            if(actWeek != 21) { //TODO pro bowl extra shit
-                actWeek = 21;
-            }
+			actWeek = 22; //TODO delete, final shit
 			refreshGamesDB(); //once at start (need actWeek)
 			
 			db.collection('actWeek').find().toArray((err, data) => {
