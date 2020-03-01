@@ -152,7 +152,8 @@ db.once('open', function () {
 	});
 	
 	//AT START
-	getFrequentNFLStats();
+    //TODO uncommment for NFL season, but also look at -17 shit for postseason
+	//getFrequentNFLStats();
 });
 
 //use sessions for tracking logins
