@@ -17,9 +17,19 @@
 		background-size:cover;
 		background-image: url('/images/top3.jpg');
 	  }
+      .header {
+        font: 32px Helvetica, Arial;
+        line-height: 200%;
+        font-weight: bold;
+      }
       p {
         font: 20px Helvetica, Arial;
         line-height: 200%;
+      }
+      summary {
+        font: 20px Helvetica, Arial;
+        line-height: 200%;
+        font-weight: bold;
       }
       .Ressourcen {
         font: 20px Helvetica, Arial;
@@ -44,15 +54,45 @@
         <span style="color:white;font-size:24px">Terraforming Mars Hausregeln</span>
 	</div>
     <div class="backgroundMain" align="center">
+    
+        <span class="header"> Regeln </span>
         <p> Positive <span class='Ressourcen'>Ressourcen</span> von <span class='Projekte'>Projekten</span> müssen nicht verteilt werden. </p>
         <p> Negative <span class='Ressourcen'>Ressourcen</span> oder <span class='Produktionen'>Produktionen</span> müssen weggenommen werden. Außer die Karte besagt "bis zu...". </p>
-        <p> <span class='Produktionen'>Produktionen</span>, außer Geld dürfen nicht unter 0 fallen. Das Einkommen darf insgesamt nicht unter 0 fallen. </p>
+        <p> <span class='Produktionen'>Produktionen</span>, außer Geld, dürfen nicht unter 0 fallen. Das Einkommen darf insgesamt nicht unter 0 fallen. </p>
         <p> <span class='Projekte'>Projekte</span>, die Ozeane platzieren, den Sauerstoff erhöhen oder die Temperatur erhöhen, dürfen auch gespielt, wenn diese schon das Maximum erreicht haben. </p>
         <p> <span class='Projekte'>Projekte</span>, durch die Städte oder Spezialplättchen platziert werden müssen, welche nicht platziert werden können, dürfen nicht gespielt werden. </p>
-        <p> Es darf nicht mit Kolonien gehandelt, wenn die entsprechenden <span class='Ressourcen'>Ressourcen</span> nicht gesammelt werden können. </p>
-        <p> Vergessene Effekte dürfen bis zum nächsten Zug des jeweiligen Spielers nachgeholt werden. Außer dieser Effekt wirkt sich negativ auf die in der Zeit gespielten Züge der Gegner aus. </p>
+        <p> Es darf nicht mit Kolonien gehandelt werden, wenn die entsprechende <span class='Ressourcen'>Ressource</span> nicht gesammelt werde kann. </p>
+        <p> Vergessene Effekte dürfen bis zum nächsten Zug des auslösenden Spielers nachgeholt werden. Außer dieser Effekt wirkt sich negativ auf die in der Zeit gespielten Züge der Gegner aus. </p>
         <p> Falls keine Reservierung für Stadt Noctis auf dem Spielbrett vorhanden ist, darf diese ohne Einschränkungen auf jedem nicht reserviertem Feld gesetzt werden. </p>
-        <p> Lavaströme dürfen andere Plättchen zerstören. </p>
+        <!--
+         <p> Lavaströme dürfen andere Plättchen zerstören. </p>
+        -->
+  
+        <hr>
+        <br>
+        <span class="header"> FAQ </span>
+        <details>
+            <summary>Welches sind reservierte Felder?</summary>
+            <p>Reservierte Felder sind halt alle Ozeanfelder und das Stadt-Noctis-Feld.</p>
+        </details>
+        <details>
+            <summary>Wie funktioniert das "Robotic Workforce"-Projekt?</summary>
+            <p>Es dürfen nur Karten(egal ob Projekte, Preludium oder Konzerne) mit einem Gebäude-Tag ausgewählt werden. 
+            <br>Nur die in dem braun-hinterlegten Bereich aufgelistete Produktion wird erneut hinzugefügt(auch die negativen Produktionen).</p>
+        </details>
+        <details>
+            <summary>Was ist der Unterschied von "when put in play" und "when play".</summary>
+            <p>"when put in play" bedeutet das die Karten wirklich ins Spiel kommenen. "when play" heißt dagegen nur das die Karte ausgespielt wird.
+            <br>Wichtig ist hierbei das die roten Karten, also solche mit dem Event-Tag, niemals "in play" kommen.
+            <br>Folglich sind alle Tags auf roten Karten sowie das Event-Tag selbst nicht für Effekte mit "when put in play" relevant.
+            <br>Bei Effekten mit "when play" zählen dagegen auch alle rote Karten mit.</p>
+        </details>
+        <details>
+            <summary>Wie wirken sich mehrere Tags auf einer Karte auf bestimmte Effekte aus?</summary>
+            <p>Generell beziehen sich viele Karten darauf, dass bestimmte Tags "in play" kommen oder "when play" ausgelöst werden.
+            <br>Dabei zählt jedes Tag einer Karte einzelnt. Somit kann der selbe Effekt auch mehrmals durch eine einzelne Karte ausgelöst werden.</p>
+        </details>
+        
 	</div>
   </body>
 </html>
