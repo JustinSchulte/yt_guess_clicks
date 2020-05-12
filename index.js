@@ -3,7 +3,7 @@ var ip = "localhost";
 var portt = "3000";
 
 //API KEYS
-var apiKey_random = "";
+//var apiKey_random = ""; //TODO may delete
 var apiKey_google = "";
 var apiKey_nfl = "";
 var apiKey_odds = "";
@@ -143,7 +143,7 @@ db.once('open', function () {
 		if (err) return console.log(err);
 		for(var i=0; i<keys.length; i++) {
 			switch(keys[i].id) {
-				case "randomYT": apiKey_random = keys[i].key; break;
+				//case "randomYT": apiKey_random = keys[i].key; break; //TODO may delete
 				case "google": apiKey_google = keys[i].key; break;
 				case "nfl": apiKey_nfl = keys[i].key; break;
 				case "odds": apiKey_odds = keys[i].key; break;
@@ -282,8 +282,9 @@ io.on('connection', function(socket){
 		//getRandomVID...
 		var vid = "test";
 		var request = require('request');
-		var random_api_url = "http://randomyoutube.net/api/getvid?api_token=" + apiKey_random;
-		console.log(random_api_url);
+		//TODO may delete two rows below (randomyt doesnt work anymore)
+        //var random_api_url = "http://randomyoutube.net/api/getvid?api_token=" + apiKey_random;
+		//console.log(random_api_url);
 		youtube.getRandomVid(apiKey_google, function(err , data){
 			if (!err) {
 				var importedJSON = data;
@@ -292,6 +293,7 @@ io.on('connection', function(socket){
 				}
 				
 				vid = importedJSON.id.videoId;
+                console.log("vid: " + vid);
 				if (typeof vid === "undefined") {
 					console.log("undefined VID");
 					io.emit('actNextB'); //ak nextButton
