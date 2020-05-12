@@ -285,6 +285,8 @@ io.on('connection', function(socket){
 		//TODO may delete two rows below (randomyt doesnt work anymore)
         //var random_api_url = "http://randomyoutube.net/api/getvid?api_token=" + apiKey_random;
 		//console.log(random_api_url);
+        
+        console.log("Google-Api-Key: " + apiKey_google);
 		youtube.getRandomVid(apiKey_google, function(err , data){
 			if (!err) {
 				var importedJSON = data;
