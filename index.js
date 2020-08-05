@@ -306,7 +306,7 @@ io.on('connection', function(socket){
 				io.emit('nv', vid);
 				
 				//getClicks
-				var google_api_url = "https://www.googleapis.com/youtube/v3/videos?id=" + vid + "%20&part=snippet%2CcontentDetails%2Cstatistics%20&key=" + apiKey_google;
+				var google_api_url = "https://www.googleapis.com/youtube/v3/videos?id=" + vid + "&part=snippet%2CcontentDetails%2Cstatistics%20&key=" + apiKey_google;
 				console.log(google_api_url);
 				request(google_api_url, function (error, response, body) {
 					if (!error && response.statusCode == 200) {
