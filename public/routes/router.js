@@ -63,6 +63,7 @@ router.post('/', function (req, res, next) {
 
 // GET route after registering
 router.get('/tipp', function (req, res, next) {
+  console.log("userID: " + req.session.userId);
   User.findById(req.session.userId)
     .exec(function (error, user) {
       if (error) {
@@ -165,7 +166,13 @@ router.post('/saveall', (req, res) => {
 		var tipps = allTipps.get(actWeek);
 		if(tipps == undefined) tipps = {};
 		for(var i=0; i<data.length; i++) {
-			tipps[data[i].gameID] = {"value": +data[i].chips, "choice": +data[i].checkedValue};
+            if(data[i].chips == 0) { 
+                //delete empty votes
+                console.log("delete empty vote");
+                delete tipps[data[i].gameID];
+            } else {
+                tipps[data[i].gameID] = {"value": +data[i].chips, "choice": +data[i].checkedValue};
+            }
 		}
 		user.tipps.set(actWeek, tipps);
 		console.log(tipps);

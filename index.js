@@ -3,7 +3,6 @@ var ip = "localhost";
 var portt = "3000";
 
 //API KEYS
-//var apiKey_random = ""; //TODO may delete
 var apiKey_google = "";
 var apiKey_nfl = "";
 var apiKey_odds = "";
@@ -51,7 +50,7 @@ var nflTeam_Map = {
 	"Buffalo Bills": "BUF",
 	"New York Jets": "NYJ",
 	"Philadelphia Eagles": "PHI",
-	"Washington Redskins": "WAS",
+	"Washington Football Team": "WAS",
 	"Baltimore Ravens": "BAL",
 	"Miami Dolphins": "MIA",
 	"Cleveland Browns": "CLE",
@@ -77,7 +76,7 @@ var nflTeam_Map = {
 	"Houston Texans": "HOU",
 	"New Orleans Saints": "NO",
 	"Denver Broncos": "DEN",
-	"Oakland Raiders": "OAK"
+	"Las Vegas Raiders": "LV"
 };
 
 //yt clicks stuff
@@ -131,7 +130,7 @@ app.use(favicon(__dirname + '/public/images/white512.png'));
 
 
 //connect to MongoDB
-var uri = 'mongodb://schokokroko:toastbrot5@cluster0-shard-00-00-cibks.mongodb.net:27017,cluster0-shard-00-01-cibks.mongodb.net:27017,cluster0-shard-00-02-cibks.mongodb.net:27017/nfl2019?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true&w=majority';
+var uri = 'mongodb://schokokroko:toastbrot5@cluster0-shard-00-00-cibks.mongodb.net:27017,cluster0-shard-00-01-cibks.mongodb.net:27017,cluster0-shard-00-02-cibks.mongodb.net:27017/nfl2020?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true&w=majority';
 mongoose.connect(uri);
 var db = mongoose.connection;
 //handle mongo error
@@ -143,7 +142,6 @@ db.once('open', function () {
 		if (err) return console.log(err);
 		for(var i=0; i<keys.length; i++) {
 			switch(keys[i].id) {
-				//case "randomYT": apiKey_random = keys[i].key; break; //TODO may delete
 				case "google": apiKey_google = keys[i].key; break;
 				case "nfl": apiKey_nfl = keys[i].key; break;
 				case "odds": apiKey_odds = keys[i].key; break;
@@ -153,7 +151,7 @@ db.once('open', function () {
 	
 	//AT START
     //TODO uncommment for NFL season, but also look at -17 shit for postseason
-	//getFrequentNFLStats();
+	getFrequentNFLStats();
 });
 
 //use sessions for tracking logins
@@ -181,10 +179,6 @@ app.get('/clicks', (req, res) => {
 	console.log("send back: " + gameArray);
 	res.send(result);
 });
-
-app.post('/saveAll', (req, res) => {
-	var newTippsArray = req.body.data;
-console.log(newTippsArray[0].myID);});
 
 //YT GAME START
 io.on('connection', function(socket){
@@ -594,6 +588,7 @@ function refreshUserDB() {
 	//add users from db
 	db.collection('users').find().toArray((err, users) => {
 		if (err) return console.log(err);
+        console.log("readDB users: " + users);
 		userArray = users;
 	});
 }
@@ -614,7 +609,7 @@ function nfl_actMatchday() {
 	var wikiData; //JSON Data result
     var options = {
         hostname: 'api.sportsdata.io',
-        path: '/v3/nfl/scores/json/CurrentWeek', //TODO should we use CurrentWeek or UpcomingWeek
+        path: '/v3/nfl/scores/json/CurrentWeek',
 		headers: {'Ocp-Apim-Subscription-Key': '5ddf733575c841fb85dae917a4b5fdd3'},
 		method: 'GET'
     };
@@ -641,15 +636,15 @@ function nfl_actMatchday() {
 			}
 			
 			//YEAH, WE GOT SOME WIKIDATA, NOW IT BEGINS
-			var newWeek = wikiData;
+            console.log("actWeek: " + actWeek);
 			
 			var month = new Date().getMonth();
 			var day = new Date().getDate();
 			if(month == 7 || (month == 8 && day<5)) { //till 5.9.
-				newWeek = 1; //TODO delete
+				actWeek = 1; //TODO delete
 				console.log("set week-variable to 1, while its pre-season");
 			}
-			actWeek = 22; //TODO delete, final shit
+			//actWeek = 22; //TODO delete, final shit
 			refreshGamesDB(); //once at start (need actWeek)
 			
 			db.collection('actWeek').find().toArray((err, data) => {
@@ -735,7 +730,7 @@ function getNewOdds() {
 
 function getNewGames() {
 	console.log("GET NEW GAMES");
-	var pathActWeek = '/v3/nfl/scores/json/ScoresByWeek/2019POST/' + (actWeek-17); //TODO POST because playoffs
+	var pathActWeek = '/v3/nfl/scores/json/ScoresByWeek/2020REG/' + actWeek; //(actWeek-17); //TODO POST because playoffs
 
 	var wikiData; //JSON Data result
 	var options = {
@@ -850,7 +845,7 @@ function nfl_games() {
 	console.log("GET NFL GAMES");
 	db.collection('actWeek').find().toArray((err, data) => {
 		if (err) return console.log(err);
-		var pathActWeek = '/v3/nfl/scores/json/ScoresByWeek/2019POST/' + (data[0].week-17); //TODO POST because playoffs and -17
+		var pathActWeek = '/v3/nfl/scores/json/ScoresByWeek/2020REG/' + data[0].week; //(data[0].week-17); //TODO POST because playoffs and -17
 	
 		var wikiData; //JSON Data result
 		var options = {
