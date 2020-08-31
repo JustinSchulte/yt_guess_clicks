@@ -175,10 +175,11 @@ router.post('/saveall', (req, res) => {
                 tipps[data[i].gameID] = {"value": +data[i].chips, "choice": +data[i].checkedValue};
             }
 		}
-		user.tipps[actWeek] = tipps;
+		user.tipps.set(actWeek, tipps);
 		console.log(tipps);
         console.log(user.tipps.get(actWeek));
 
+        user.markModified('tipps');
 		user.save(function (err) {
 			if(err) {
 				console.error('ERROR!');
