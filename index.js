@@ -131,7 +131,8 @@ app.use(favicon(__dirname + '/public/images/white512.png'));
 
 
 //connect to MongoDB
-var uri = 'mongodb://schokokroko:toastbrot5@cluster0-shard-00-00-cibks.mongodb.net:27017,cluster0-shard-00-01-cibks.mongodb.net:27017,cluster0-shard-00-02-cibks.mongodb.net:27017/nfl2020?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true&w=majority';
+//var uri = 'mongodb://schokokroko:toastbrot5@cluster0-shard-00-00-cibks.mongodb.net:27017,cluster0-shard-00-01-cibks.mongodb.net:27017,cluster0-shard-00-02-cibks.mongodb.net:27017/nfl2020?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true&w=majority';
+var uri = 'mongodb+srv://schokokroko:toastbrot5@cluster0.cibks.mongodb.net/nfl2020?retryWrites=true&w=majority'
 mongoose.connect(uri);
 var db = mongoose.connection;
 //handle mongo error
