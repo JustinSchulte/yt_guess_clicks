@@ -32,7 +32,8 @@ router.post('/', function (req, res, next) {
 	  points: 10000,
 	  allpoints: 10000,
 	  pointhistory: {0: 10000},
-	  tipps: new Map(),
+	  /*tipps: new Map(),*/
+      tipps: {type: Map, of: Map}
     }
     User.create(userData, function (error, user) {
       if (error) {
