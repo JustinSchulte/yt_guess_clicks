@@ -176,6 +176,7 @@ router.post('/saveall', (req, res) => {
 		}
 		user.tipps.set(actWeek, tipps);
 		console.log(tipps);
+        console.log(user.tipps,get(actWeek));
 
 		user.save(function (err) {
 			if(err) {
