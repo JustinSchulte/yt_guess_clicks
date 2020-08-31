@@ -38,6 +38,7 @@ var gameSchema = mongoose.Schema({
 	away: String,
 	quoteHome: Number,
 	quoteAway: Number,
+    date: String,
 	winner: String
 });
 var game = mongoose.model('game', gameSchema);
@@ -776,6 +777,7 @@ function getNewGames() {
 					awayFullName : "",
 					quoteHome: 0,
 					quoteAway: 0,
+                    date: match.DateTime,
 					winner: "none"
 				}
 				game.create(gameData, function (error, g) {
