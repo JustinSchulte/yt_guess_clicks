@@ -138,6 +138,7 @@ router.post('/save', (req, res) => {
 		user.tipps.set(actWeek, tipps);
 		console.log(tipps);
 		
+        user.markModified('tipps'); //mucho wichtig, sonst speichert er die Änderungen ggf nicht(nur bei raspb Problem)
 		user.save(function (err) {
 			if(err) {
 				console.error('ERROR!');
