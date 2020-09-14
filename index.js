@@ -638,6 +638,7 @@ function nfl_actMatchday() {
 			}
 			
 			//YEAH, WE GOT SOME WIKIDATA, NOW IT BEGINS
+            actWeek = wikiData;
             console.log("actWeek: " + actWeek);
 			
 			var month = new Date().getMonth();
