@@ -488,7 +488,9 @@ function showResults() {
 	} else {
 		addPoints = 1;
 	}
+    console.log(addPoints); //TODO delete
 	addPoints = (addPoints + additor) * multipl;
+    console.log(addPoints); //TODO delete
 	multipl = 1; //nur für diese Runde
 	additor = 0;
 	
@@ -496,6 +498,7 @@ function showResults() {
 		var p_addPoints = addPoints;
 		var win = win_s[i];
 		if(wm_fish.has(win)) p_addPoints = p_addPoints * 2; //fishcard aktiviert
+        console.log(p_addPoints); //TODO delete
 		var newScore = parseInt(p_addPoints) + parseInt(wm_points.get(win));
 		wm_points.set(win, newScore);
 		
