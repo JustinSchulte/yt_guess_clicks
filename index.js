@@ -490,7 +490,7 @@ function showResults() {
 	}
     console.log("0");
     console.log(addPoints); //TODO delete
-	addPoints = (addPoints + additor) * multipl;
+	addPoints = (parseInt(addPoints) + additor) * multipl;
     console.log("1");
     console.log(addPoints); //TODO delete
 	multipl = 1; //nur für diese Runde
