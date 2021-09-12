@@ -131,8 +131,8 @@ app.use(favicon(__dirname + '/public/images/white512.png'));
 
 
 //connect to MongoDB
-//var uri = 'mongodb://schokokroko:toastbrot5@cluster0-shard-00-00-cibks.mongodb.net:27017,cluster0-shard-00-01-cibks.mongodb.net:27017,cluster0-shard-00-02-cibks.mongodb.net:27017/nfl2020?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true&w=majority';
-var uri = 'mongodb+srv://schokokroko:toastbrot5@cluster0.cibks.mongodb.net/nfl2020?retryWrites=true&w=majority'
+//var uri = 'mongodb://schokokroko:toastbrot5@cluster0-shard-00-00-cibks.mongodb.net:27017,cluster0-shard-00-01-cibks.mongodb.net:27017,cluster0-shard-00-02-cibks.mongodb.net:27017/nfl2021?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true&w=majority';
+var uri = 'mongodb+srv://schokokroko:toastbrot5@cluster0.cibks.mongodb.net/nfl2021?retryWrites=true&w=majority'
 mongoose.connect(uri);
 var db = mongoose.connection;
 //handle mongo error
@@ -733,7 +733,7 @@ function getNewOdds() {
 
 function getNewGames() {
 	console.log("GET NEW GAMES");
-	var pathActWeek = '/v3/nfl/scores/json/ScoresByWeek/2020REG/' + actWeek; //(actWeek-17); //TODO POST because playoffs
+	var pathActWeek = '/v3/nfl/scores/json/ScoresByWeek/2021REG/' + actWeek; //(actWeek-17); //TODO POST because playoffs
 
 	var wikiData; //JSON Data result
 	var options = {
@@ -849,7 +849,7 @@ function nfl_games() {
 	console.log("GET NFL GAMES");
 	db.collection('actWeek').find().toArray((err, data) => {
 		if (err) return console.log(err);
-		var pathActWeek = '/v3/nfl/scores/json/ScoresByWeek/2020REG/' + data[0].week; //(data[0].week-17); //TODO POST because playoffs and -17
+		var pathActWeek = '/v3/nfl/scores/json/ScoresByWeek/2021REG/' + data[0].week; //(data[0].week-17); //TODO POST because playoffs and -17
 	
 		var wikiData; //JSON Data result
 		var options = {
